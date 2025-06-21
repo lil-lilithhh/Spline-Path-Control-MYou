@@ -1,6 +1,6 @@
 # Spline Path Control v2.0
 
-![Screenshot 2025-06-17 140228](https://github.com/user-attachments/assets/6f86e6ea-caa6-4adc-8855-7114d3601b14)
+![ss2](https://github.com/user-attachments/assets/7519f457-967d-4012-a4bd-9ff972ffd6ee)
 
 ## Overview
 
@@ -12,7 +12,7 @@ Use it here for free: https://whatdreamscost.github.io/Spline-Path-Control/
 
 ▶️ YouTube Video
 ---
-[![Spline Path Control Video](https://img.youtube.com/vi/wqq8N6ahsAk/0.jpg)](https://www.youtube.com/watch?v=wqq8N6ahsAk)
+[![Spline Path Control Video](https://img.youtube.com/vi/viJkmzTwPuI/0.jpg)](https://www.youtube.com/watch?v=viJkmzTwPuI)
 
 ## ✨ Features
 
@@ -28,6 +28,14 @@ Use it here for free: https://whatdreamscost.github.io/Spline-Path-Control/
 * **WebM Export:** Export your animation with a white background, perfect for use as a control video in VACE.
 
 ## 🔄 Recent Updates
+
+* **6/21/25 V2 Update:**
+    * Added Dark Mode!
+    * Overhauled preview display. Now the preview accurately displays the timing and animation of the splines, allowing for much greater control.
+    * Added the ability to save and import canvases. You can now create, save, import, and share your spline layouts. When you click Export Canvas it will create a .png with metadata that you can import back into the editor. This also allows you to create presets that can be applied to any image.
+    * Added the ability to multiselect any object. You can now CTRL+Click to multiselect any object. You can also CTRL+Click+Drag to create a selection box and multiselect objects. This makes moving around things much easier and intuitive.
+    * Added Undo and Redo function. Accidently move something? Well now you can undo and redo any action. Either use the buttons or CTRL+Z to undo and CTRL+Y to redo.
+    * Added a bunch more improvements that i'm too tired to type out right now 😂
 
 * **6/18/25:**
     * Added 'Clone' Button, you can now clone any object copying it's properties and shape
