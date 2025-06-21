@@ -1,4 +1,4 @@
-# Spline Path Control
+# Spline Path Control v2.0
 
 ![Screenshot 2025-06-17 140228](https://github.com/user-attachments/assets/6f86e6ea-caa6-4adc-8855-7114d3601b14)
 
