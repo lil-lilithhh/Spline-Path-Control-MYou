@@ -87,8 +87,11 @@ Simply plug the webm into the control_video or control_images VACE input using a
 ## 💡 Example Workflows
 **Download Workflows Here:** https://github.com/WhatDreamsCost/Spline-Path-Control/tree/main/example_workflows
 
-**I2V VACE Control Workflow** 
+**Simple I2V VACE Control Workflow** 
 ![i2v_vace_control_example](https://github.com/user-attachments/assets/a2d19416-b595-4631-a2e2-2f202391dd95)
+
+**The Workflow I use (Has optimizations, can resize images/videos automatically, and easier to change settings** 
+![workflow_advanced_screenshot](https://github.com/user-attachments/assets/5ed31e84-f59f-4e32-a1d4-13564f4c9974)
 
 ## 💡 Tips
 (Coming Soon)
