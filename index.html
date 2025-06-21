@@ -14,94 +14,94 @@
       <div id="spline-controls" class="spline-controls">
         <h3>Selected Spline Control</h3>
         
-        <!-- Spline Controls -->
-        <div class="control-group">
-          <label for="selectedStartFrame">Start Frame:</label>
-          <input type="number" id="selectedStartFrame" min="0" max="9999" step="1" value="0">
+        <!-- This new wrapper will be shown or hidden based on selection -->
+        <div id="item-specific-controls">
+            <!-- Spline Controls -->
+            <div class="control-group">
+              <label for="selectedStartFrame">Start Frame:</label>
+              <input type="number" id="selectedStartFrame" min="0" max="99999" step="1" value="0">
+            </div>
+            <div class="control-group">
+              <label for="selectedTotalFrames">Total Frames:</label>
+              <input type="number" id="selectedTotalFrames" min="1" max="99999" step="1" value="80">
+            </div>
+            <div class="control-group">
+              <label>Size:</label>
+              <div class="size-inputs">
+                <input type="number" id="selectedSizeX" min="1" max="1000" value="30" title="Size X">
+                <input type="number" id="selectedSizeY" min="1" max="1000" value="30" title="Size Y">
+              </div>
+            </div>
+            <div class="control-group">
+              <label for="selectedType">Shape:</label>
+              <select id="selectedType">
+                <option value="circle">Circle</option>
+                <option value="square">Square</option>
+                <option value="triangle">Triangle</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="selectedFillColor">Fill:</label>
+              <input type="color" id="selectedFillColor" value="#ffffff">
+            </div>
+            <div class="control-group">
+              <label for="selectedStrokeColor">Border:</label>
+              <input type="color" id="selectedStrokeColor" value="#000000">
+            </div>
+            <div class="control-group">
+              <label for="selectedStrokeWeight">Width:</label>
+              <input type="number" id="selectedStrokeWeight" min="0" max="10" step="0.25" value="1">
+            </div>
+            <div class="control-group">
+              <label for="selectedTension">Tension:</label>
+              <input type="number" id="selectedTension" min="0" max="1" step="0.1" value="0">
+            </div>
+            <div class="control-group">
+              <label for="selectedEasing">Easing:</label>
+              <select id="selectedEasing">
+                <option value="linear">Linear</option>
+                <option value="easeIn">Ease-in</option>
+                <option value="easeOut">Ease-out</option>
+                <option value="easeInOut">Ease-in-out</option>
+              </select>
+            </div>
         </div>
-        <div class="control-group">
-          <label for="selectedDuration">Seconds:</label>
-          <input type="number" id="selectedDuration" min="0.1" max="60" step="0.1" value="5">
+
+        <!-- Canvas and Background settings are now outside the conditional wrapper -->
+        <div id="canvas-settings-wrapper">
+            <div class="section-divider">Canvas Settings</div>
+            
+            <div class="control-group">
+              <label for="canvasWidth">Width:</label>
+              <input type="number" id="canvasWidth" min="100" max="2000" value="1000">
+            </div>
+            <div class="control-group">
+              <label for="canvasHeight">Height:</label>
+              <input type="number" id="canvasHeight" min="100" max="2000" value="562">
+            </div>
+            <div class="control-group">
+              <button id="updateCanvasSize">Update Canvas</button>
+            </div>
+            <div class="control-group">
+              <button id="resetCanvasSize">Reset Canvas Size</button>
+            </div>
         </div>
-        <!-- UPDATED: Size control replaced with Size X and Size Y -->
-        <div class="control-group">
-          <label>Size:</label>
-          <div class="size-inputs">
-            <input type="number" id="selectedSizeX" min="1" max="1000" value="30" title="Size X">
-            <input type="number" id="selectedSizeY" min="1" max="1000" value="30" title="Size Y">
-          </div>
-        </div>
-        <div class="control-group">
-          <label for="selectedType">Shape:</label>
-          <select id="selectedType">
-            <option value="circle">Circle</option>
-            <option value="square">Square</option>
-            <option value="triangle">Triangle</option>
-          </select>
-        </div>
-        <div class="control-group">
-          <label for="selectedFillColor">Fill:</label>
-          <input type="color" id="selectedFillColor" value="#ffffff">
-        </div>
-        <div class="control-group">
-          <label for="selectedStrokeColor">Border:</label>
-          <input type="color" id="selectedStrokeColor" value="#000000">
-        </div>
-        <div class="control-group">
-          <label for="selectedStrokeWeight">Width:</label>
-          <input type="number" id="selectedStrokeWeight" min="0" max="10" step="0.25" value="1">
-        </div>
-        <div class="control-group">
-          <label for="selectedTension">Tension:</label>
-          <input type="number" id="selectedTension" min="0" max="1" step="0.1" value="0">
-        </div>
-        <!-- Easing function dropdown -->
-        <div class="control-group">
-          <label for="selectedEasing">Easing:</label>
-          <select id="selectedEasing">
-            <option value="linear">Linear</option>
-            <option value="easeIn">Ease-in</option>
-            <option value="easeOut">Ease-out</option>
-            <option value="easeInOut">Ease-in-out</option>
-          </select>
+
+        <div id="bg-settings-wrapper">
+            <div class="section-divider">Background Image</div>
+            
+            <div class="control-group">
+              <input type="file" id="bgImage" accept="image/*, .png">
+            </div>
+            <div class="control-group">
+              <button id="clearBg">Clear Background</button>
+            </div>
         </div>
         
-        <!-- Divider above Canvas Settings -->
-        <div class="section-divider">Canvas Settings</div>
-        
-        <!-- Canvas Controls -->
-        <div class="control-group">
-          <label for="canvasWidth">Width:</label>
-          <input type="number" id="canvasWidth" min="100" max="2000" value="1000">
-        </div>
-        <div class="control-group">
-          <label for="canvasHeight">Height:</label>
-          <input type="number" id="canvasHeight" min="100" max="2000" value="562">
-        </div>
-        <div class="control-group">
-          <button id="updateCanvasSize">Update Canvas</button>
-        </div>
-        
-        <div class="control-group">
-        <button id="resetCanvasSize">Reset Canvas Size</button>
-      </div>
-        
-        <!-- New divider below Update Canvas button -->
-        <div class="section-divider">Background Image</div>
-        
-        <!-- Image Controls -->
-        <div class="control-group">
-          <input type="file" id="bgImage" accept="image/*">
-        </div>
-        <div class="control-group">
-          <button id="clearBg">Clear Background</button>
-        </div>
       </div>
       
       <div class="canvas-area">
-        <!-- The p5.js canvas and export overlay will be placed here -->
         <div id="canvas-container">
-            <!-- ** MOVED: Export Overlay UI is now inside the canvas container ** -->
             <div id="export-overlay">
               <div class="export-dialog">
                 <h3 id="export-title">Creating Video...</h3>
@@ -114,7 +114,6 @@
             </div>
         </div>
         
-        <!-- Spline Management Buttons -->
       <div class="spline-management">
         <button id="newSpline">New Spline</button>
         <button id="deleteSpline">Delete Spline</button>
@@ -123,16 +122,16 @@
         <button id="addShape">Add Anchor</button>
         <button id="cloneItem">Clone</button>
         <button id="clearAll">Clear All</button>
+        <!-- Undo/Redo buttons added here -->
+        <button id="undoBtn">Undo</button>
+        <button id="redoBtn">Redo</button>
 
-        <!-- Spacer div to push the following buttons to the far right -->
         <div class="spacer"></div>
         
-        <!-- New Preview Control Buttons -->
         <button id="playOnce">Play Once</button>
         <button id="loopPreview">Loop Preview: ON</button>
       </div>
         
-        <!-- Export Controls -->
         <div class="export-container">
           <div class="export-left-panel">
             <div class="export-settings">
@@ -141,22 +140,32 @@
                 <input type="number" id="exportFPS" min="1" max="120" value="16">
               </div>
               <div class="control-group">
-                <label for="exportSeconds">Length (s):</label>
-                <input type="number" id="exportSeconds" min="0.1" max="300" step="0.1" value="5">
+                <label for="exportTotalFrames">Length (in frames):</label>
+                <input type="number" id="exportTotalFrames" min="1" max="99999" step="1" value="80">
               </div>
             </div>
             <div class="export-controls">
               <button id="exportVideo">Export Video</button>
               <button id="cancelExport">Cancel Export</button>
             </div>
+            <div class="export-controls">
+              <button id="exportCanvas">Export Canvas</button>
+              <button id="loadCanvasBtn">Import Canvas</button>
+              <input type="file" id="loadCanvas" accept=".png" hidden>
+            </div>
           </div>
           
-          <div class="info-box">
-             <b>Tips:</b><br>
-             <a href="https://github.com/WhatDreamsCost/Spline-Path-Control" target="_blank">Click here to see guides, workflows, updates and more</a><br>
-             • You can drag and drop images on the canvas.<br>
-             • Lower 'Seconds' to make shapes move faster.<br>
-             • Raise 'Seconds' to make shapes move slower.<br>
+          <div class="right-panel-container">
+            <div class="theme-toggle-container">
+              <button id="themeToggle">Switch to Dark Mode</button>
+            </div>
+            <div class="info-box">
+               <a href="https://github.com/WhatDreamsCost/Spline-Path-Control" target="_blank">Click here to see guides, workflows, updates and more tips</a><br>
+• You can drag and drop images and canvases in the editor.<br>
+• Double click anywhere on splines to quickly add a point at that spot.<br>
+• You can save and import canvases! When you import a canvas it will copy over all of the splines and shapes.<br>
+ • CTRL+Z Undo, CTRL+Y Redo, CTRL+Left Click Drag for Selection Box, CTRL+Left Click Multiselect/Deselect<br>
+            </div>
           </div>
         </div>
       </div>
