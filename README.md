@@ -1,4 +1,4 @@
-# Spline Path Control v2.0
+# Spline Path Control v2.1
 
 ![ss2](https://github.com/user-attachments/assets/7519f457-967d-4012-a4bd-9ff972ffd6ee)
 
@@ -28,6 +28,9 @@ Use it here for free: https://whatdreamscost.github.io/Spline-Path-Control/
 * **WebM Export:** Export your animation with a white background, perfect for use as a control video in VACE.
 
 ## 🔄 Recent Updates
+
+* **6/23/25 V2.1 Update:**
+    * Changed the default output from black shapes on a white background to white shapes on a black background. This pretty much solves the 'residual' issue and greatly improves the output's motion. 
 
 * **6/21/25 V2 Update:**
     * Added Dark Mode!
