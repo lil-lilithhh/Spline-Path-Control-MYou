@@ -283,7 +283,7 @@ function updateUndoRedoButtons() {
 function addNewSpline() {
   const defaultSettings = {
     startFrame: 0, totalFrames: 80, shapeSizeX: 10, shapeSizeY: 10, shapeType: 'square',
-    fillColor: '#ffffff', strokeColor: '#000000', strokeWeight: 0.5, tension: 0, easing: 'linear',
+    fillColor: '#000000', strokeColor: '#ffffff', strokeWeight: 0.5, tension: 0, easing: 'linear',
   };
   const yOffset = (splines.length % 10) * 20;
   const newSpline = { 
@@ -300,7 +300,7 @@ function addNewSpline() {
 function addStaticShape() {
   const defaultSettings = {
     shapeSizeX: 10, shapeSizeY: 10, shapeType: 'square',
-    fillColor: '#ffffff', strokeColor: '#000000', strokeWeight: 0.5
+    fillColor: '#000000', strokeColor: '#ffffff', strokeWeight: 0.5
   };
   const xOffset = (staticShapes.length % 5) * 20;
   const yOffset = (staticShapes.length % 5) * 20;
@@ -1418,7 +1418,7 @@ function startExport() {
 }
 
 function drawExportFrame(overallProgress) {
-  exportCanvas.background(255);
+  exportCanvas.background(0); // Changed background to black
   const exportCurrentTimeMs = overallProgress * exportDuration * 1000;
   
   for (const shape of staticShapes) {
