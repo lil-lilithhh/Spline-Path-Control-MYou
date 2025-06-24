@@ -16,6 +16,11 @@ I just updated something very important in v2.1, you will see a HUGE improvement
 
 Someone on discord kindly pointed out that VACE was designed for white shapes on a black background, not the other way around. Turns out this small change in the code greatly improves the tracking and motion and solves a lot of the problems people were having. Sorry for not realizing this sooner.
 
+Here's a comparison:
+
+https://github.com/user-attachments/assets/65013101-d6b7-4d1e-bec6-64a1f0fce140
+
+
 ▶️ YouTube Video
 ---
 [![Spline Path Control Video](https://img.youtube.com/vi/viJkmzTwPuI/0.jpg)](https://www.youtube.com/watch?v=viJkmzTwPuI)
