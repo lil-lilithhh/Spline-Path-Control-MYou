@@ -10,6 +10,12 @@ This project was created to simplify the process of generating control videos fo
 
 Use it here for free: https://whatdreamscost.github.io/Spline-Path-Control/
 
+**PSA UPDATE V2.1:**
+
+I just updated something very important in v2.1, you will see a HUGE improvement in motion and will no longer get any 'residual' shapes in the output.
+
+Someone on discord kindly pointed out that VACE was designed for white shapes on a black background, not the other way around. Turns out this small change in the code greatly improves the tracking and motion and solves a lot of the problems people were having. Sorry for not realizing this sooner.
+
 ▶️ YouTube Video
 ---
 [![Spline Path Control Video](https://img.youtube.com/vi/viJkmzTwPuI/0.jpg)](https://www.youtube.com/watch?v=viJkmzTwPuI)
