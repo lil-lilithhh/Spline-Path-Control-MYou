@@ -1,4 +1,4 @@
-# Spline Path Control v2.1
+# Spline Path Control v2.2
 
 ![ss2](https://github.com/user-attachments/assets/7519f457-967d-4012-a4bd-9ff972ffd6ee)
 
@@ -39,6 +39,11 @@ https://github.com/user-attachments/assets/65013101-d6b7-4d1e-bec6-64a1f0fce140
 * **WebM Export:** Export your animation with a white background, perfect for use as a control video in VACE.
 
 ## 🔄 Recent Updates
+
+* **6/25/25 V2.2 Update:**
+    * Added "Hide Once Completed" checkbox. Now you can control whether or not a shape is hidden when not playing. This will allow you to for example seamlessly connect multiple splines together, create more dynamic and complex camera movements and much more.
+    * Added ability to clone all selected items
+    * Added ability to delete all selected items
 
 * **6/23/25 V2.1 Update:**
     * Changed the default output from black shapes on a white background to white shapes on a black background. This pretty much solves the 'residual' issue and greatly improves the output's motion. 
