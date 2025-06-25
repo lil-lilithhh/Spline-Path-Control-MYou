@@ -167,6 +167,16 @@ h3 {
   font-size: 14px;
 }
 
+/* ADDED: Specific styling for the new checkbox control */
+.control-group label[for="selectedHideOnComplete"] {
+    min-width: initial; /* Override fixed width */
+    flex-grow: 1; /* Allow label to take up space */
+}
+.control-group input#selectedHideOnComplete {
+    flex-grow: 0; /* Prevent checkbox from growing */
+}
+
+
 .size-inputs {
   display: flex;
   flex-grow: 1;
