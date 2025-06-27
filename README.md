@@ -50,6 +50,13 @@ https://github.com/user-attachments/assets/65013101-d6b7-4d1e-bec6-64a1f0fce140
 I hope some of you find this tool helpful! Even though I used AI to create this, it still took many hours over the course of the last week and a half to create. Some may say using AI to code is unethical or cheating, but without it this tool would've never been made.
 
 
+
+https://github.com/user-attachments/assets/9c87ccf2-12b7-4fd0-8f78-de88ea57adb7
+
+*Example: The new curve editor is very powerful*
+
+
+
 * **6/25/25 V2.2 Update:**
     * Added "Hide Once Completed" checkbox. Now you can control whether or not a shape is hidden when not playing. This will allow you to for example seamlessly connect multiple splines together, create more dynamic and complex camera movements and much more.
     * Added ability to clone all selected items
