@@ -1,470 +1,556 @@
-/* --- A Modern, Minimal Light Theme for the Spline Editor --- */
+/* --- Modern Dashboard UI Theme --- */
 
-/* 1. Global Box-Sizing Reset */
+/* 1. Global Box-Sizing & Font Reset */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 html {
   box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 *, *:before, *:after {
   box-sizing: inherit;
+  --transition-speed: 0.2s;
 }
 
-/* 2. CSS Variables for Easy Theming */
+/* 2. CSS Variables for Theming */
 :root {
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  
-  /* Light Theme Palette */
-  --bg-main: #f4f7f9;
-  --bg-surface: #ffffff;
-  --bg-controls: #f0f2f5;
-  --bg-canvas: #ffffff; 
-  --text-primary: #212529;
-  --text-secondary: #5a5a5a;
-  --border-color: #dee2e6;
-  --link-color: #007bff; 
-  --link-color-hover: #0056b3;
-  
-  --accent-primary: #007bff;
-  --accent-primary-hover: #0069d9;
-  --accent-danger: #dc3545;
-  --accent-danger-hover: #c82333;
-  --accent-success: #28a745;
-  --accent-success-hover: #218838;
-  --accent-neutral: #e9ecef;
-  --accent-neutral-hover: #dde1e4;
-  --accent-info: #17a2b8;
-  --accent-info-hover: #138496;
+  /* Light Theme Palette - Professional & Clean */
+  --bg-main: #f3f4f6;              
+  --bg-surface: #ffffff;           
+  --bg-controls: #ffffff;          
+  --bg-canvas: #ffffff;
+  --text-primary: #111827;         
+  --text-secondary: #6b7280;       
+  --border-color: #e5e7eb;         
+  --border-color-subtle: #f3f4f6;
+  --link-color: #2563eb;
+  --link-color-hover: #1d4ed8;
+
+  --accent-primary: #2563eb;       /* Primary is Blue */
+  --accent-primary-hover: #1d4ed8;
+  --accent-green: #19b461;         /* Secondary is a lighter Green */
+  --accent-green-hover: #169c53;
+  --accent-danger: #dc2626;        
+  --accent-danger-hover: #b91c1c;
+  --accent-neutral: #e5e7eb;
+  --accent-neutral-hover: #d1d5db;
+
+  --glow-primary: color-mix(in srgb, var(--accent-primary) 35%, transparent);
+  --glow-green: color-mix(in srgb, var(--accent-green) 35%, transparent);
+  --glow-neutral: color-mix(in srgb, var(--text-secondary) 25%, transparent);
+  --scrollbar-thumb: #d1d5db;
+  --scrollbar-thumb-hover: #9ca3af;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
-/* --- Dark Mode Theme --- */
 body.dark-mode {
-  --bg-main: #1a1d21;
-  --bg-surface: #2c313a;
-  --bg-controls: #212529;
-  --bg-canvas: #0d1117; /* The dark background for the canvas area */
-  --text-primary: #f8f9fa;
-  --text-secondary: #adb5bd;
-  --border-color: #495057;
-  --link-color: #58a6ff; 
-  --link-color-hover: #80bfff;
-  --accent-neutral: #343a40;
-  --accent-neutral-hover: #495057;
+  /* Dark Theme Palette - Based on Reference Image */
+  --bg-main: #111317;              
+  --bg-surface: #1C1F24;           
+  --bg-controls: #1C1F24;          
+  --bg-canvas: #000000;
+  --text-primary: #e6e6e6;         
+  --text-secondary: #9a9a9a;       
+  --border-color: #363A42;         
+  --border-color-subtle: #25282e;
+  --link-color: #00f5a0;
+  --link-color-hover: #31ffd1;
+
+  --accent-primary: #0ea5e9;       /* Primary is Blue */
+  --accent-primary-hover: #38bdf8;
+  --accent-green: #00f5a0;        /* Secondary is Green */
+  --accent-green-hover: #00d68e;
+  --accent-danger: #e84855;        
+  --accent-danger-hover: #e32d3a;
+  --accent-neutral: #363A42;
+  --accent-neutral-hover: #484d57;
+  
+  --glow-primary: color-mix(in srgb, var(--accent-primary) 25%, transparent);
+  --glow-green: color-mix(in srgb, var(--accent-green) 20%, transparent);
+  --glow-neutral: color-mix(in srgb, var(--text-secondary) 20%, transparent);
+  
+  --scrollbar-thumb: #484d57;
+  --scrollbar-thumb-hover: #5f6570;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
 }
 
 /* 3. Global Resets & Body Styling */
 body {
   margin: 0;
-  padding: 10px;
-  font-family: var(--font-sans);
+  padding: 1rem;
   background-color: var(--bg-main);
   color: var(--text-primary);
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-h2, h3 {
-  color: var(--text-primary);
-  margin-top: 0;
-}
-
-h2 {
-  font-weight: 600;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 15px;
+  transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+  overflow: hidden;
 }
 
 h3 {
-  font-weight: 500;
+  color: var(--text-primary);
+  margin-top: 0;
+  font-weight: 600;
+}
+
+#spline-controls h3 {
+  text-align: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
 /* 4. Main Layout Structure */
 .controls {
-  padding: 10px;
+  padding: 1rem;
   background: var(--bg-surface);
   border-radius: 12px;
   border: 1px solid var(--border-color);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  flex-grow: 1; 
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  flex-grow: 1;
+  transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+  min-height: 0;
 }
 
 .main-content {
   display: flex;
-  gap: 20px;
+  gap: 1.25rem;
   margin-top: 1px;
   flex-grow: 1;
   min-height: 0;
 }
 
 #spline-controls {
-  width: 280px;
-  padding: 20px;
+  width: 320px;
+  padding: 1.25rem;
   background: var(--bg-controls);
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--border-color);
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.03);
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
+
+#spline-controls::-webkit-scrollbar { width: 8px; }
+#spline-controls::-webkit-scrollbar-track { background: transparent; }
+#spline-controls::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+#spline-controls::-webkit-scrollbar-thumb:hover { background-color: var(--scrollbar-thumb-hover); }
 
 .canvas-area {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.25rem;
+  min-height: 0; /* Important for flex children to not overflow */
 }
 
 #canvas-container {
+  flex-grow: 1; /* Make this container grow */
   position: relative;
-  max-width: 100%;
-  margin: 0;
-  background-color: var(--bg-canvas); /* This will be the visible background */
-  border-radius: 8px; /* Added for better visuals */
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.03);
-  overflow: hidden; 
-  transition: all 0.2s ease-in-out;
+  background-color: var(--bg-canvas);
+  border-radius: 10px;
+  overflow: hidden;
   border: 1px solid var(--border-color);
+  transition: all var(--transition-speed) ease-in-out;
+  display: flex; /* Use flex to center the canvas */
+  justify-content: center;
+  align-items: center;
 }
-
 #canvas-container canvas {
   display: block;
   max-width: 100%;
-  height: auto !important;
+  max-height: 100%;
 }
-
 #canvas-container.dragging-over {
   border-color: var(--accent-primary);
-  background-color: rgba(0, 123, 255, 0.05);
-  transform: scale(1.01);
+  box-shadow: 0 0 15px 1px var(--glow-primary);
 }
 
 /* 5. Control & Input Styling */
 .section-divider {
-  font-weight: 600;
-  margin: 10px 0 15px 0;
-  padding-top: 20px;
+  font-weight: 500;
+  margin: 1.25rem 0;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--border-color);
-  color: var(--text-primary);
-  transition: border-color 0.3s ease, color 0.3s ease;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
 }
 
 .control-group {
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.75rem;
 }
-
+.control-group button { flex-grow: 1; }
 .control-group label {
-  min-width: 75px;
+  min-width: 80px;
   font-weight: 500;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
+.control-group label[for="selectedHideOnComplete"] { min-width: initial; flex-grow: 1; }
+.control-group input#selectedHideOnComplete { flex-grow: 0; }
+.size-inputs { display: flex; flex-grow: 1; gap: 0.5rem; }
+.size-inputs input { width: 100%; }
 
-/* ADDED: Specific styling for the new checkbox control */
-.control-group label[for="selectedHideOnComplete"] {
-    min-width: initial; /* Override fixed width */
-    flex-grow: 1; /* Allow label to take up space */
-}
-.control-group input#selectedHideOnComplete {
-    flex-grow: 0; /* Prevent checkbox from growing */
-}
-
-
-.size-inputs {
-  display: flex;
+input[type="number"], select {
   flex-grow: 1;
-  gap: 10px;
-}
-
-.size-inputs input {
-  width: 100%; 
-}
-
-input[type="number"],
-select {
-  flex-grow: 1;
-  padding: 8px 10px;
-  background-color: var(--bg-surface);
+  padding: 0.5rem 0.75rem;
+  background-color: var(--bg-main);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-primary);
-  font-size: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s;
+  font-size: 0.875rem;
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
 }
-
 input:focus, select:focus {
   outline: none;
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  box-shadow: 0 0 8px 0px var(--glow-primary);
 }
 
+input[type="number"]:hover,
+select:hover,
+input[type="color"]:hover {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 8px 0px var(--glow-primary);
+}
+
+
+input[type="number"] {
+  cursor: ew-resize; 
+  -moz-appearance: textfield; 
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
 input[type="color"] {
-  min-width: 40px;
-  height: 35px;
-  padding: 2px;
+  min-width: 38px;
+  height: 38px;
+  padding: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: var(--bg-main);
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+input[type="file"] { color: var(--text-secondary); font-size: 0.875rem; }
+
+input[type="file"]::file-selector-button {
+  padding: 0.5rem 1rem;
   border: 1px solid var(--border-color);
   border-radius: 6px;
   cursor: pointer;
-  background-color: transparent;
-}
-
-input[type="file"] {
-  color: var(--text-secondary);
-  font-size: 13px;
-}
-
-input[type="file"]::file-selector-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
-  transition: background-color 0.2s;
-  background-color: var(--accent-info);
-  color: white;
-  margin-right: 15px;
+  background-color: var(--accent-neutral);
+  color: var(--text-primary);
+  margin-right: 1rem;
+  transition: background-color var(--transition-speed);
 }
 
 input[type="file"]::file-selector-button:hover {
-  background-color: var(--accent-info-hover);
+  background-color: var(--accent-neutral-hover);
 }
+
 
 /* 6. Button Styling */
 button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.2s, transform 0.1s;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all var(--transition-speed) ease-in-out;
   white-space: nowrap;
 }
-
-button:active {
-  transform: scale(0.98);
-}
-
-button:disabled,
-button[disabled] {
+button:active { transform: scale(0.97); }
+button:disabled, button[disabled] {
   background-color: var(--accent-neutral) !important;
   color: var(--text-secondary) !important;
-  border-color: var(--border-color) !important;
+  border-color: transparent !important;
   cursor: not-allowed;
   transform: none;
-  opacity: 0.65;
+  opacity: 0.5;
+  box-shadow: none !important;
+}
+button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 8px 2px var(--glow-primary);
 }
 
-.dark-mode button:disabled,
-.dark-mode button[disabled] {
-    background-color: #343a40 !important;
-    color: #6c757d !important;
-}
-
-
-#spline-controls button {
-  width: 100%;
-}
-
-.spline-management {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-}
-
-.spacer {
-  flex-grow: 1;
-}
+.spline-management { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.spacer { flex-grow: 1; }
 
 .export-container {
   display: flex;
-  flex-direction: row; 
+  flex-direction: row;
   align-items: stretch;
   justify-content: space-between;
-  gap: 20px; 
-  padding-top: 15px;
+  gap: 1.25rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--border-color);
-  transition: border-color 0.3s ease;
 }
-
-.export-left-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  flex-shrink: 0;
-}
-
-.export-settings,
-.export-controls {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-.right-panel-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: flex-end; /* Align children (button, info-box) to the right */
-}
-
-.right-panel-container #themeToggle {
-  /* This button now uses its natural width */
-}
+.export-left-panel { display: flex; flex-direction: column; gap: 1rem; flex-shrink: 0; }
+.export-settings, .export-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; }
+.right-panel-container { display: flex; flex-direction: column; gap: 0.75rem; align-items: flex-end; }
 
 .info-box {
-  background-color: var(--bg-controls);
+  background-color: var(--bg-main);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 10px 30px;
-  font-size: 13px;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
-  line-height: 1.5;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
-  width: 100%; /* Make info-box take full width of its container */
+  line-height: 1.6;
+}
+.info-box a { color: var(--link-color); text-decoration: none; font-weight: 500; }
+.info-box a:hover { text-decoration: underline; color: var(--link-color-hover); }
+
+/* --- Blue (Light) / Green (Dark) Primary Buttons --- */
+#updateCanvasSize, #newSpline, #addPoint, #addShape, #exportVideo {
+  background-color: var(--accent-primary);
+  color: #fff;
+}
+#updateCanvasSize:hover, #newSpline:hover, #addPoint:hover, #addShape:hover, #exportVideo:hover {
+  background-color: var(--accent-primary-hover);
+  box-shadow: 0 0 15px 1px var(--glow-primary);
+}
+body.dark-mode #updateCanvasSize,
+body.dark-mode #newSpline,
+body.dark-mode #addPoint,
+body.dark-mode #addShape,
+body.dark-mode #exportVideo {
+    background-color: var(--accent-green);
+    color: #000;
+}
+body.dark-mode #updateCanvasSize:hover,
+body.dark-mode #newSpline:hover,
+body.dark-mode #addPoint:hover,
+body.dark-mode #addShape:hover,
+body.dark-mode #exportVideo:hover {
+  background-color: var(--accent-green-hover);
+  box-shadow: 0 0 15px 1px var(--glow-green);
 }
 
-.info-box a {
-    color: var(--link-color);
-    text-decoration: none;
-    transition: color 0.2s;
+/* --- Consistently Blue Buttons --- */
+#playOnce {
+  background-color: var(--accent-primary);
+  color: #fff;
 }
-.info-box a:hover {
-    color: var(--link-color-hover);
-    text-decoration: underline;
+#playOnce:hover {
+    background-color: var(--accent-primary-hover);
+    box-shadow: 0 0 15px 1px var(--glow-primary);
 }
-
-/* --- Button Color Themes --- */
-#playOnce, #exportVideo, #updateCanvasSize, #newSpline, #addPoint, #addShape { 
-  background-color: var(--accent-primary); color: white; 
+body.dark-mode #playOnce {
+  background-color: var(--accent-primary);
+  color: #000000;
 }
-#playOnce:hover, #exportVideo:hover, #updateCanvasSize:hover, #newSpline:hover, #addPoint:hover, #addShape:hover { 
-  background-color: var(--accent-primary-hover); 
-}
-
-#cloneItem, #loopPreview, #exportCanvas {
-  background-color: var(--accent-success);
-  color: white;
-}
-#cloneItem:hover, #loopPreview:hover, #exportCanvas:hover {
-  background-color: var(--accent-success-hover);
+body.dark-mode #playOnce:hover {
+  background-color: var(--accent-primary-hover);
+  box-shadow: 0 0 15px 1px var(--glow-primary);
 }
 
-#cancelExport, #clearAll, #clearBg, #resetCanvasSize, #deleteSpline, #removePoint {
-  background-color: var(--accent-danger); color: white;
+/* --- Consistently Green Buttons --- */
+#loopPreview {
+    background-color: var(--accent-green);
+    color: #fff;
 }
-#cancelExport:hover, #clearAll:hover, #clearBg:hover, #resetCanvasSize:hover, #deleteSpline:hover, #removePoint:hover {
-  background-color: var(--accent-danger-hover);
+#loopPreview:hover {
+    background-color: var(--accent-green-hover);
+    box-shadow: 0 0 15px 1px var(--glow-green);
+}
+body.dark-mode #loopPreview {
+    background-color: var(--accent-green);
+    color: #000;
+}
+body.dark-mode #loopPreview:hover {
+    background-color: var(--accent-green-hover);
+    box-shadow: 0 0 15px 1px var(--glow-green);
+}
+
+/* --- Green (Light) / Blue (Dark) Buttons --- */
+#cloneItem, #exportCanvas {
+    background-color: var(--accent-green);
+    color: #fff;
+}
+#cloneItem:hover, #exportCanvas:hover {
+    background-color: var(--accent-green-hover);
+    box-shadow: 0 0 15px 1px var(--glow-green);
+}
+body.dark-mode #cloneItem,
+body.dark-mode #exportCanvas {
+    background-color: var(--accent-primary);
+    color: #000000;
+}
+body.dark-mode #cloneItem:hover,
+body.dark-mode #exportCanvas:hover {
+    background-color: var(--accent-primary-hover);
+    box-shadow: 0 0 15px 1px var(--glow-primary);
+}
+
+
+/* --- Destructive / Danger Buttons --- */
+#cancelExport, #clearAll, #clearBg, #resetCanvasSize, #deleteSpline, #removePoint, #resetCurveBtn, #resetEasingCurveBtn {
+  background-color: transparent;
+  color: var(--accent-danger);
+  border-color: var(--accent-danger);
+}
+#cancelExport:hover, #clearAll:hover, #clearBg:hover, #resetCanvasSize:hover, #deleteSpline:hover, #removePoint:hover, #resetCurveBtn:hover, #resetEasingCurveBtn:hover {
+  background-color: var(--accent-danger);
+  color: #fff;
+  border-color: var(--accent-danger);
+  box-shadow: 0 0 15px 1px color-mix(in srgb, var(--accent-danger) 30%, transparent);
+}
+
+/* --- Neutral Buttons --- */
+#themeToggle, #loadCanvasBtn, #undoBtn, #redoBtn {
+  background-color: var(--accent-neutral);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+#themeToggle:hover, #loadCanvasBtn:hover, #undoBtn:hover, #redoBtn:hover {
+  background-color: var(--accent-neutral-hover);
+  border-color: var(--border-color);
+  box-shadow: 0 0 15px 1px var(--glow-neutral);
 }
 
 #clearAll {
-  position: relative; /* For positioning the pseudo-element */
-  --clear-all-margin: 30px;
+  position: relative;
+  --clear-all-margin: 2rem;
   margin-left: var(--clear-all-margin);
 }
-
-/* Vertical divider before the Clear All button */
 #clearAll::before {
   content: '';
   position: absolute;
-  left: calc((var(--clear-all-margin) + 10px + 2px) / -2);
-  top: 20%;
-  bottom: 20%;
-  width: 2px;
+  left: calc((var(--clear-all-margin) + 0.75rem) / -2);
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
   background-color: var(--border-color);
-  transition: background-color 0.3s ease;
-}
-
-.theme-toggle-container {
-  /* This container no longer needs special styling */
-}
-
-#themeToggle, #loadCanvasBtn, #undoBtn, #redoBtn {
-  background-color: var(--accent-info);
-  color: white;
-}
-
-#themeToggle:hover, #loadCanvasBtn:hover, #undoBtn:hover, #redoBtn:hover {
-  background-color: var(--accent-info-hover);
-}
-
-.controls > h2 {
-  display: none;
 }
 
 /* --- Export Overlay Styles --- */
 #export-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(244, 247, 249, 0.8);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  inset: 0;
+  background-color: color-mix(in srgb, var(--bg-surface) 90%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: none;
   justify-content: center;
   align-items: center;
   z-index: 10;
-  padding: 15px;
+  padding: 1rem;
 }
-
-.dark-mode #export-overlay {
-    background-color: rgba(26, 29, 33, 0.8);
-}
-
 .export-dialog {
   background-color: var(--bg-surface);
-  padding: 30px 40px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
   text-align: center;
   width: 100%;
   max-width: 480px;
 }
-
-.export-dialog h3 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  font-size: 24px;
-  color: var(--text-primary);
-}
-
+.export-dialog h3 { font-size: 1.5rem; margin-bottom: 1.5rem; }
 .progress-bar-container {
-  background-color: var(--bg-controls);
-  border-radius: 6px;
-  height: 12px;
-  margin-bottom: 10px;
+  background-color: var(--bg-main);
+  border-radius: 8px;
+  height: 1rem;
+  margin-bottom: 0.75rem;
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
-
 #progress-bar-fill {
   background-color: var(--accent-primary);
-  width: 0%;
   height: 100%;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: width 0.1s linear;
 }
+#export-percentage { font-size: 1.125rem; font-weight: 500; margin-bottom: 0.25rem; }
+#export-frame-count { font-size: 0.875rem; color: var(--text-secondary); margin-top: 0; }
 
-#export-percentage {
-  font-size: 18px;
-  font-weight: 500;
-  margin-bottom: 5px;
-  color: var(--text-primary);
+/* --- Collapsible Section Styles --- */
+.collapsible-header {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    border: 1px solid var(--border-color);
+    text-align: left;
+    outline: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.collapsible-header:hover { background-color: var(--accent-neutral); }
+body.dark-mode .collapsible-header:hover { background-color: var(--bg-surface); }
+
+.collapsible-header::after {
+    content: '';
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 0.15em solid currentColor;
+    border-bottom: 0.15em solid currentColor;
+    transform: translateY(-25%) rotate(45deg);
+    transition: transform 0.2s ease;
+}
+.collapsible-header.collapsed::after { transform: translateY(0) rotate(-135deg); }
+
+.collapsible-content {
+    padding: 0 0.5rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease-out;
 }
 
-#export-frame-count {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-top: 0;
+.collapsible-section.has-top-divider {
+    margin-top: 5px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+    transition: border-color var(--transition-speed) ease;
+}
+
+/* --- Animation Curve Editor Styles --- */
+.curve-editor-container {
+    height: 150px;
+    background-color: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-top: 0.75rem;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+.curve-editor-container ~ .control-group { margin-top: 0.75rem; }
+.curve-editor-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: default;
 }

@@ -3,7 +3,10 @@
 <head>
   <title>Spline Editor</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <!-- Reverted script tags to remove 'defer' as requested -->
   <script src="sketch.js"></script>
+  <script src="curveEditor.js"></script>
+  <script src="easingCurveEditor.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,94 +15,125 @@
     <div class="main-content">
       <!-- Spline Controls Sidebar -->
       <div id="spline-controls" class="spline-controls">
-        <h3>Selected Spline Control</h3>
+        <h3>Settings</h3>
         
-        <!-- This new wrapper will be shown or hidden based on selection -->
-        <div id="item-specific-controls">
-            <!-- Spline Controls -->
-            <div class="control-group">
-              <label for="selectedStartFrame">Start Frame:</label>
-              <input type="number" id="selectedStartFrame" min="0" max="99999" step="1" value="0">
+        <!-- Spline Settings Section -->
+        <div id="spline-settings-section" class="collapsible-section">
+            <button type="button" class="collapsible-header collapsed">Spline Settings</button>
+            <div class="collapsible-content">
+                <div class="control-group">
+                    <label for="selectedStartFrame">Start Frame:</label>
+                    <input type="number" id="selectedStartFrame" min="0" max="99999" step="1" value="0">
+                </div>
+                <div class="control-group">
+                    <label for="selectedTotalFrames">Total Frames:</label>
+                    <input type="number" id="selectedTotalFrames" min="1" max="99999" step="1" value="80">
+                </div>
+                <div class="control-group">
+                  <label for="selectedTension">Tension:</label>
+                  <input type="number" id="selectedTension" min="0" max="1" step="0.1" value="0">
+                </div>
+                <div class="control-group">
+                    <label for="selectedHideOnComplete">Hide When Done</label>
+                    <input type="checkbox" id="selectedHideOnComplete">
+                </div>
+                <div class="section-divider">Path Easing</div>
+                <div id="easing-curve-editor-container" class="curve-editor-container"></div>
+                <div class="control-group">
+                    <button id="resetEasingCurveBtn">Reset</button>
+                </div>
             </div>
-            <div class="control-group">
-              <label for="selectedTotalFrames">Total Frames:</label>
-              <input type="number" id="selectedTotalFrames" min="1" max="99999" step="1" value="80">
-            </div>
-            <!-- ADDED: Checkbox to hide shape on completion -->
-            <div class="control-group">
-              <label for="selectedHideOnComplete">Hide Once Completed</label>
-              <input type="checkbox" id="selectedHideOnComplete">
-            </div>
-            <div class="control-group">
-              <label>Size:</label>
-              <div class="size-inputs">
-                <input type="number" id="selectedSizeX" min="1" max="1000" value="30" title="Size X">
-                <input type="number" id="selectedSizeY" min="1" max="1000" value="30" title="Size Y">
-              </div>
-            </div>
-            <div class="control-group">
-              <label for="selectedType">Shape:</label>
-              <select id="selectedType">
-                <option value="circle">Circle</option>
-                <option value="square">Square</option>
-                <option value="triangle">Triangle</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label for="selectedFillColor">Fill:</label>
-              <input type="color" id="selectedFillColor" value="#000000">
-            </div>
-            <div class="control-group">
-              <label for="selectedStrokeColor">Border:</label>
-              <input type="color" id="selectedStrokeColor" value="#ffffff">
-            </div>
-            <div class="control-group">
-              <label for="selectedStrokeWeight">Width:</label>
-              <input type="number" id="selectedStrokeWeight" min="0" max="10" step="0.25" value="1">
-            </div>
-            <div class="control-group">
-              <label for="selectedTension">Tension:</label>
-              <input type="number" id="selectedTension" min="0" max="1" step="0.1" value="0">
-            </div>
-            <div class="control-group">
-              <label for="selectedEasing">Easing:</label>
-              <select id="selectedEasing">
-                <option value="linear">Linear</option>
-                <option value="easeIn">Ease-in</option>
-                <option value="easeOut">Ease-out</option>
-                <option value="easeInOut">Ease-in-out</option>
-              </select>
+        </div>
+        
+        <!-- Anchor Settings Section -->
+        <div id="anchor-settings-section" class="collapsible-section" style="display: none;">
+            <button type="button" class="collapsible-header collapsed">Anchor Settings</button>
+            <div class="collapsible-content">
+                <div class="control-group">
+                    <label for="anchorStartFrame">Start Frame:</label>
+                    <input type="number" id="anchorStartFrame" min="0" max="99999" step="1" value="0">
+                </div>
+                <div class="control-group">
+                    <label for="anchorTotalFrames">Total Frames:</label>
+                    <input type="number" id="anchorTotalFrames" min="1" max="99999" step="1" value="80">
+                </div>
+                <div class="control-group">
+                    <label for="anchorHideOnComplete">Hide When Done</label>
+                    <input type="checkbox" id="anchorHideOnComplete" checked>
+                </div>
             </div>
         </div>
 
-        <!-- Canvas and Background settings are now outside the conditional wrapper -->
-        <div id="canvas-settings-wrapper">
-            <div class="section-divider">Canvas Settings</div>
-            
-            <div class="control-group">
-              <label for="canvasWidth">Width:</label>
-              <input type="number" id="canvasWidth" min="100" max="2000" value="1000">
-            </div>
-            <div class="control-group">
-              <label for="canvasHeight">Height:</label>
-              <input type="number" id="canvasHeight" min="100" max="2000" value="562">
-            </div>
-            <div class="control-group">
-              <button id="updateCanvasSize">Update Canvas</button>
-            </div>
-            <div class="control-group">
-              <button id="resetCanvasSize">Reset Canvas Size</button>
+        <!-- Shape Settings Section -->
+        <div id="shape-settings-section" class="collapsible-section">
+             <button type="button" class="collapsible-header collapsed">Shape Settings</button>
+             <div class="collapsible-content">
+                <div class="control-group">
+                  <label for="selectedType">Shape:</label>
+                  <select id="selectedType">
+                    <option value="circle">Circle</option>
+                    <option value="square">Square</option>
+                    <option value="triangle">Triangle</option>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <label for="selectedFillColor">Fill:</label>
+                  <input type="color" id="selectedFillColor" value="#000000">
+                </div>
+                <div class="control-group">
+                  <label for="selectedStrokeColor">Border:</label>
+                  <input type="color" id="selectedStrokeColor" value="#ffffff">
+                </div>
+                <div class="control-group">
+                  <label for="selectedStrokeWeight">Width:</label>
+                  <input type="number" id="selectedStrokeWeight" min="0" max="10" step="0.25" value="1">
+                </div>
+                <div class="control-group">
+                  <label>Size:</label>
+                  <div class="size-inputs">
+                    <input type="number" id="selectedSizeX" min="1" max="1000" value="15" title="Size X">
+                    <input type="number" id="selectedSizeY" min="1" max="1000" value="15" title="Size Y">
+                  </div>
+                </div>
+                <div class="section-divider">Scale Over Time</div>
+                <div id="curve-editor-container" class="curve-editor-container"></div>
+                <div class="control-group">
+                    <button id="resetCurveBtn">Reset</button>
+                </div>
             </div>
         </div>
 
-        <div id="bg-settings-wrapper">
-            <div class="section-divider">Background Image</div>
-            
-            <div class="control-group">
-              <input type="file" id="bgImage" accept="image/*, .png">
+        <!-- Canvas Settings Section -->
+        <div class="collapsible-section">
+            <button type="button" class="collapsible-header collapsed">Canvas Settings</button>
+            <div class="collapsible-content">
+                <div class="control-group">
+                  <label for="canvasWidth">Width:</label>
+                  <input type="number" id="canvasWidth" min="100" max="4000" value="1920">
+                </div>
+                <div class="control-group">
+                  <label for="canvasHeight">Height:</label>
+                  <input type="number" id="canvasHeight" min="100" max="4000" value="800">
+                </div>
+                <div class="control-group">
+                  <button id="updateCanvasSize">Update Canvas</button>
+                </div>
+                <div class="control-group">
+                  <button id="resetCanvasSize">Reset Canvas Size</button>
+                </div>
             </div>
-            <div class="control-group">
-              <button id="clearBg">Clear Background</button>
+        </div>
+
+        <!-- Background Image Section -->
+        <div class="collapsible-section">
+            <button type="button" class="collapsible-header">Background Image</button>
+            <div class="collapsible-content">
+                <div class="control-group">
+                  <input type="file" id="bgImage" accept="image/*, .png">
+                </div>
+                <div class="control-group">
+                  <button id="clearBg">Clear Background</button>
+                </div>
             </div>
         </div>
         
@@ -120,10 +154,10 @@
         </div>
         
       <div class="spline-management">
-        <button id="newSpline">New Spline</button>
+        <button id="newSpline">Add Spline</button>
         <button id="deleteSpline">Delete Spline</button>
         <button id="addPoint">Add Point</button>
-        <button id="removePoint">Remove Point/Anchor</button>
+        <button id="removePoint">Delete Point/Anchor</button>
         <button id="addShape">Add Anchor</button>
         <button id="cloneItem">Clone</button>
         <button id="clearAll">Clear All</button>
@@ -166,11 +200,10 @@
             </div>
             <div class="info-box">
                <a href="https://github.com/WhatDreamsCost/Spline-Path-Control" target="_blank">Click here to see guides, workflows, updates and more tips</a><br>
-• CTRL+Z Undo, CTRL+Y Redo, CTRL+Left Click Drag for Selection Box, CTRL+Left Click Multiselect/Deselect<br>
-• You can drag and drop images and canvases in the editor.<br>
-• Double click anywhere on splines to quickly add a point.<br>
-• You can save and import canvases! When you import a canvas it will copy over all of the splines and shapes.
- 
+• CTRL+Z Undo, CTRL+Y Redo, CTRL+V Paste Image, CTRL+Left Click Drag for Selection Box,<br> CTRL+Left Click Multiselect/Deselect, Right Click or Delete Key to Delete<br>
+• You can drag and drop images and canvases in the editor<br>
+• Double click anywhere on splines to quickly add a point<br>
+• Double click in the curve editors to add a point, right click to remove
             </div>
           </div>
         </div>
