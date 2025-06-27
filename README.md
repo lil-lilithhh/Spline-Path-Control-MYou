@@ -1,6 +1,6 @@
-# Spline Path Control v2.2
+# Spline Path Control v2.3
 
-![ss2](https://github.com/user-attachments/assets/7519f457-967d-4012-a4bd-9ff972ffd6ee)
+![v2 3 Screenshot](https://github.com/user-attachments/assets/8c9ee922-a246-4b78-89aa-da057521deb5)
 
 ## Overview
 
@@ -39,6 +39,16 @@ https://github.com/user-attachments/assets/65013101-d6b7-4d1e-bec6-64a1f0fce140
 * **WebM Export:** Export your animation with a white background, perfect for use as a control video in VACE.
 
 ## 🔄 Recent Updates
+
+* **6/27/25 V2.3 Update:**
+    * Added Multi-Editing. You can now edit multiple objects at once and their properties.
+    * Added Curve Editors for controlling both the Easing and Scale. These are very powerful tools that will allow you to get the exact motion you want. Want something to grow larger overtime or pulse in and out? Want to finetune the speed of something? What to easily control camera movement? The new Curve Editors make it possible (and easy)
+    * UI Overhaul. Made many changes to the UI, such as a new sexy dark and light theme, collapsible and categorized menus, new animations, added ability to drag to increase/decrease values, cleaner layout, improved scaling system for the canvas and much more. I spent quite a few hours on this one lol
+    * Added ability to paste images into the editor with CTRL+V, and delete anything with the Delete key, and delete points by right clicking.
+    * And a long list of other functions, small fixes, and quality of life changes that would take too long to write out 😅
+
+I hope some of you find this tool helpful! Even though I used AI to create this, it still took many hours over the course of the last week and a half to create. Some may say using AI to code is unethical or cheating, but without it this tool would've never been made.
+
 
 * **6/25/25 V2.2 Update:**
     * Added "Hide Once Completed" checkbox. Now you can control whether or not a shape is hidden when not playing. This will allow you to for example seamlessly connect multiple splines together, create more dynamic and complex camera movements and much more.
