@@ -1,25 +1,11 @@
-# Spline Path Control v2.3
+# Spline Path Control MYou v2.4
 
-![v2 3 Screenshot](https://github.com/user-attachments/assets/8c9ee922-a246-4b78-89aa-da057521deb5)
+<img width="1852" height="994" alt="user-interface-skateboard" src="https://github.com/user-attachments/assets/2dbb954a-1cda-4367-b9dc-a554c8534f50" />
+
 
 ## Overview
 
-Spline Path Control is a simple tool designed to make it easy to create motion controls. It allows you to create and animate shapes that follow splines, and then export the result as a `.webm` video file.
-
-This project was created to simplify the process of generating control videos for tools like VACE. Use it to control the motion of anything (camera movement, objects, humans etc) all without extra prompting.
-
-Use it here for free: https://whatdreamscost.github.io/Spline-Path-Control/
-
-**PSA UPDATE V2.1:**
-
-I just updated something very important in v2.1, you will see a HUGE improvement in motion and will no longer get any 'residual' shapes in the output.
-
-Someone on discord kindly pointed out that VACE was designed for white shapes on a black background, not the other way around. Turns out this small change in the code greatly improves the tracking and motion and solves a lot of the problems people were having. Sorry for not realizing this sooner.
-
-Here's a comparison:
-
-https://github.com/user-attachments/assets/65013101-d6b7-4d1e-bec6-64a1f0fce140
-
+Spline Path Control MYou is a simple tool inspired by Material You. It's designed to make it easy to create motion controls, which allows you to create and animate shapes that follow splines, and then export the result as a `.webm` video file. Input the motion paths into VACE to control the motion of anything (camera movement, objects, humans etc) all without extra prompting.
 
 ▶️ YouTube Video
 ---
@@ -32,110 +18,17 @@ https://github.com/user-attachments/assets/65013101-d6b7-4d1e-bec6-64a1f0fce140
 * **Full Control of Splines and Shapes:**
     * **Start Frame:** Set a delay before a spline's animation begins.
     * **Duration:** Control the speed of the shape along its path.
-    * **Easing:** Apply `Linear`, `Ease-in`, `Ease-out`, and `Ease-in-out` functions for smooth acceleration and deceleration.
-    * **Tension:** Adjust the "curviness" of the spline path.
+    * **Easing:** Ease in-and-out spline paths.
+    * **Tension:** Make spline path and easing paths bezier.
     * **Shape Customization:** Change the shape (circle, square, triangle), size, fill color, and border.
 * **Reference Images:** Drag and drop or upload a background image to trace paths over an existing image.
-* **WebM Export:** Export your animation with a white background, perfect for use as a control video in VACE.
-
-## 🔄 Recent Updates
-
-* **6/27/25 V2.3 Update:**
-    * Added Multi-Editing. You can now edit multiple objects at once and their properties.
-    * Added Curve Editors for controlling both the Easing and Scale. These are very powerful tools that will allow you to get the exact motion you want. Want something to grow larger overtime or pulse in and out? Want to finetune the speed of something? What to easily control camera movement? The new Curve Editors make it possible (and easy)
-    * UI Overhaul. Made many changes to the UI, such as a new sexy dark and light theme, collapsible and categorized menus, new animations, added ability to drag to increase/decrease values, cleaner layout, improved scaling system for the canvas and much more. I spent quite a few hours on this one lol
-    * Added ability to paste images into the editor with CTRL+V, and delete anything with the Delete key, and delete points by right clicking.
-    * And a long list of other functions, small fixes, and quality of life changes that would take too long to write out 😅
-
-I hope some of you find this tool helpful! Even though I used AI to create this, it still took many hours over the course of the last week and a half to create. Some may say using AI to code is unethical or cheating, but without it this tool would've never been made.
-
-
-
-https://github.com/user-attachments/assets/9c87ccf2-12b7-4fd0-8f78-de88ea57adb7
-
-*Example: The new curve editor is very powerful*
-
-
-
-* **6/25/25 V2.2 Update:**
-    * Added "Hide Once Completed" checkbox. Now you can control whether or not a shape is hidden when not playing. This will allow you to for example seamlessly connect multiple splines together, create more dynamic and complex camera movements and much more.
-    * Added ability to clone all selected items
-    * Added ability to delete all selected items
-    * Added Start Frame and Total Frame control for anchors.
-
-* **6/23/25 V2.1 Update:**
-    * Changed the default output from black shapes on a white background to white shapes on a black background. This pretty much solves the 'residual' issue and greatly improves the output's motion. 
-
-* **6/21/25 V2 Update:**
-    * Added Dark Mode!
-    * Overhauled preview display. Now the preview accurately displays the timing and animation of the splines, allowing for much greater control.
-    * Added the ability to save and import canvases. You can now create, save, import, and share your spline layouts. When you click Export Canvas it will create a .png with metadata that you can import back into the editor. This also allows you to create presets that can be applied to any image.
-    * Added the ability to multiselect any object. You can now CTRL+Click to multiselect any object. You can also CTRL+Click+Drag to create a selection box and multiselect objects. This makes moving around things much easier and intuitive.
-    * Added Undo and Redo function. Accidently move something? Well now you can undo and redo any action. Either use the buttons or CTRL+Z to undo and CTRL+Y to redo.
-    * Added a bunch more improvements that i'm too tired to type out right now 😂
-
-* **6/18/25:**
-    * Added 'Clone' Button, you can now clone any object copying it's properties and shape
-    * Added 'Play Once' and a 'Loop Preview' toggle. You can now set the preview to either play once or to loop continuously.
-    * Added ability to drag and move entire splines. You can now click and drag entire splines to easily move them.
-    * Added extra control to the size. You can now set the X and Y size of any shape.
-    * Made it easier to move anchors. (You can now click anywhere on an anchor to move it instead of just then center)
-    * Changed Default Canvas Size
-    * Fixed Reset Canvas Size Button
-    * Added offset to newly created anchors to prevent overlapping.
-
-![Update 6-18 Image](https://github.com/user-attachments/assets/df05931d-3681-44a4-a3d4-0899a92c0f37)
-
-**If anyone has features they want added let me know!**
-
-* **6/17/25:**
-    * Fixed splines looping in exported video. Now the animation will only play once in the exported video.
-    * Made the export UI prettier 😎
-
-* **6/17/25:**
-    * Added **Start Frame** control to delay the beginning of a spline's animation.
-    * Added **Easing Functions** (Linear, Ease-in, Ease-out, Ease-in-out) for smoother animations.
-    * Fixed a CSS alignment issue in the control panel for a cleaner UI.
-
-## 🎥 Examples
-
-Here are just a few examples of what you can do with a simple control path:
-
-https://github.com/user-attachments/assets/fb026d9d-df72-4784-a99f-ee3b423339ec
-
-*Example: Controlling the camera to rotate around a scene*
-
-https://github.com/user-attachments/assets/5ae81d1c-1dd3-47ba-bed2-cfd65318bcaf
-
-*Example: Controlling the pose of a character*
-
-https://github.com/user-attachments/assets/f8623321-0521-4a8f-844e-68d4f26c4ca9
-
-*Example: Using paths to control the movement of the dragon and person*
-
-https://github.com/user-attachments/assets/92034c81-12e1-434c-a811-1f46ab69d3a8
-
-*Example: Controlling the camera to push in*
+* **WebM Export:** Export your animation with a black background, perfect for use as a control video in VACE.
 
 ## ❓ How to Use With ComfyUI
 
-Simply plug the webm into the control_video or control_images VACE input using any load video node. There are example workflows below.
-
-## 💡 Example Workflows
-**Download Workflows Here:** https://github.com/WhatDreamsCost/Spline-Path-Control/tree/main/example_workflows
-
-**Simple I2V VACE Control Workflow** 
-![i2v_vace_control_example](https://github.com/user-attachments/assets/a2d19416-b595-4631-a2e2-2f202391dd95)
-
-**The Workflow I use (Has optimizations, can resize images/videos automatically, and easier to change settings** 
-![workflow_advanced_screenshot](https://github.com/user-attachments/assets/5ed31e84-f59f-4e32-a1d4-13564f4c9974)
-
-## 💡 Tips
-(Coming Soon)
-
+Simply plug the webm into the control_video or control_images VACE input using any load video node. There are example workflows [here](https://github.com/WhatDreamsCost/Spline-Path-Control/tree/main/example_workflows).
 
 ## Credits
 
 * **Author:** [WhatDreamsCost](https://github.com/WhatDreamsCost)
 * **Framework:** Built with [p5.js](https://p5js.org/).
-* **Additional Info:** I used DeepSeek and Google Gemini to make both this project and even this README file.
