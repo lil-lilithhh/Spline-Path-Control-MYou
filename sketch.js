@@ -28,10 +28,15 @@ let originalImageDimensions = { width: 1920, height: 800 };
 let trueOriginalImageDimensions = null;
 let canvas;
 let appStartTime;
-let loopingPreview = true; 
-let loopPreviewButton; 
 let themeToggleButton;
 let exportOverlay, progressBarFill, exportPercentage, exportFrameCount;
+let timelineScrubber, frameCounter;
+let isScrubbing = false;
+let playbackStartTime = 0;
+let timeOffset = 0;
+let isPlaying = false;
+let isLooping = true;
+
 
 // Undo/Redo variables
 let history = [];
@@ -53,7 +58,6 @@ let splineColorIndex = 0;
 
 
 // New variables for playback control
-let isPlayingOnce = false;
 const METADATA_MARKER = "SPLINEDATA::";
 
 // =========
@@ -72,6 +76,8 @@ function setup() {
   progressBarFill = document.getElementById('progress-bar-fill');
   exportPercentage = document.getElementById('export-percentage');
   exportFrameCount = document.getElementById('export-frame-count');
+  timelineScrubber = document.getElementById('timelineScrubber');
+  frameCounter = document.getElementById('frameCounter');
   
   // Default to dark mode if no theme is saved or if the saved theme is 'dark'
   const savedTheme = localStorage.getItem('splineEditorTheme');
@@ -140,14 +146,16 @@ function setupEventListeners() {
   document.getElementById('clearAll').addEventListener('click', clearAll);
   document.getElementById('clearBg').addEventListener('click', () => { backgroundImg = null; document.getElementById('bgImage').value = ''; recordState(); });
   document.getElementById('bgImage').addEventListener('change', handleSceneFile);
+  document.getElementById('importImage').addEventListener('click', () => document.getElementById('bgImage').click());
   document.getElementById('addPoint').addEventListener('click', addPointToSpline);
   document.getElementById('addShape').addEventListener('click', addStaticShape);
   document.getElementById('updateCanvasSize').addEventListener('click', updateCanvasSize);
   document.getElementById('resetCanvasSize').addEventListener('click', resetCanvasSize);
   document.getElementById('cloneItem').addEventListener('click', cloneSelectedItem);
-  document.getElementById('playOnce').addEventListener('click', playOnce);
-  loopPreviewButton = document.getElementById('loopPreview');
-  loopPreviewButton.addEventListener('click', toggleLooping);
+  
+  document.getElementById('playPauseBtn').addEventListener('click', togglePlayback);
+  document.getElementById('loopBtn').addEventListener('click', toggleLoop);
+  
   themeToggleButton = document.getElementById('themeToggle');
   themeToggleButton.addEventListener('click', toggleTheme);
   
@@ -165,6 +173,22 @@ function setupEventListeners() {
   // Add paste event listener
   window.addEventListener('paste', handlePaste);
 
+  timelineScrubber.addEventListener('input', () => {
+    isScrubbing = true;
+    isPlaying = false;
+  });
+  timelineScrubber.addEventListener('mousedown', () => {
+    isScrubbing = true;
+    isPlaying = false;
+  });
+  timelineScrubber.addEventListener('mouseup', () => {
+    isScrubbing = false;
+    const exportFpsValue = parseInt(document.getElementById('exportFPS').value) || 16;
+    const exportTotalFramesValue = parseInt(document.getElementById('exportTotalFrames').value) || 80;
+    const mainTimelineDurationMs = (exportTotalFramesValue / exportFpsValue) * 1000;
+    timeOffset = parseFloat(timelineScrubber.value) * mainTimelineDurationMs;
+  });
+
   if (document.body.classList.contains('dark-mode')) {
     themeToggleButton.textContent = 'Switch to Light Mode';
   } else {
@@ -174,9 +198,9 @@ function setupEventListeners() {
   // NEW: Consolidated event listeners for multi-edit
   const allControls = [
       // Spline Settings
-      'selectedStartFrame', 'selectedTotalFrames', 'selectedTension', 'selectedHideOnComplete',
+      'selectedStartFrame', 'selectedTotalFrames', 'selectedTension', 'selectedEasingTension', 'selectedHideOnComplete',
       // Anchor Settings
-      'anchorStartFrame', 'anchorTotalFrames', 'anchorHideOnComplete',
+      'anchorStartFrame', 'anchorTotalFrames', 'anchorHideOnComplete', 'anchorScaleTension',
       // Shape Settings
       'selectedType', 'selectedFillColor', 'selectedStrokeColor', 'selectedStrokeWeight',
       'selectedSizeX', 'selectedSizeY'
@@ -212,8 +236,26 @@ function setupEventListeners() {
         easingCurveEditor.onCurveChanged = handleEasingCurveChange;
     }
   }, 100);
-}
 
+  // Canvas Size Modal Logic
+  const canvasSizeModal = document.getElementById('canvas-size-dialog');
+  const canvasSizeBtn = document.getElementById('canvasSize');
+  const closeBtn = document.querySelector('.close-button');
+
+  canvasSizeBtn.onclick = function() {
+    canvasSizeModal.style.display = 'block';
+  }
+
+  closeBtn.onclick = function() {
+    canvasSizeModal.style.display = 'none';
+  }
+
+  window.onclick = function(event) {
+    if (event.target == canvasSizeModal) {
+      canvasSizeModal.style.display = 'none';
+    }
+  }
+}
 // =========
 // DRAW
 // =========
@@ -236,14 +278,25 @@ function draw() {
   drawStaticShapes();
   drawSelectionBox();
 
-  if (isPlayingOnce) {
-    const exportFpsValue = parseInt(document.getElementById('exportFPS').value) || 16;
-    const exportTotalFramesValue = parseInt(document.getElementById('exportTotalFrames').value) || 80;
-    const playOnceDurationMs = (exportTotalFramesValue / exportFpsValue) * 1000;
-    if (millis() - appStartTime >= playOnceDurationMs) {
-      isPlayingOnce = false; 
+  const exportFpsValue = parseInt(document.getElementById('exportFPS').value) || 16;
+  const exportTotalFramesValue = parseInt(document.getElementById('exportTotalFrames').value) || 80;
+  const mainTimelineDurationMs = (exportTotalFramesValue / exportFpsValue) * 1000;
+  let elapsedTime;
+  
+  if(isPlaying) {
+    elapsedTime = (millis() - playbackStartTime) + timeOffset;
+    if(isLooping) {
+      elapsedTime = elapsedTime % mainTimelineDurationMs;
+    } else {
+      elapsedTime = constrain(elapsedTime, 0, mainTimelineDurationMs);
     }
+    timelineScrubber.value = elapsedTime / mainTimelineDurationMs;
+  } else {
+    elapsedTime = parseFloat(timelineScrubber.value) * mainTimelineDurationMs;
   }
+
+  let currentFrame = Math.floor((elapsedTime / mainTimelineDurationMs) * exportTotalFramesValue);
+  frameCounter.textContent = `${String(currentFrame).padStart(2, '0')} / ${exportTotalFramesValue}`;
 
   drawMovingShapes();
   if (draggedPoint) { drawDragIndicator(); }
@@ -378,10 +431,12 @@ function handleSettingChange(event) {
         'selectedStartFrame': { name: 'startFrame', type: 'int' },
         'selectedTotalFrames': { name: 'totalFrames', type: 'int' },
         'selectedTension': { name: 'tension', type: 'float' },
+        'selectedEasingTension': { name: 'easingTension', type: 'float' },
         'selectedHideOnComplete': { name: 'hideOnComplete', type: 'bool' },
         'anchorStartFrame': { name: 'startFrame', type: 'int' },
         'anchorTotalFrames': { name: 'totalFrames', type: 'int' },
         'anchorHideOnComplete': { name: 'hideOnComplete', type: 'bool' },
+        'anchorScaleTension': { name: 'scaleTension', type: 'float' },
         'selectedType': { name: 'shapeType', type: 'string' },
         'selectedFillColor': { name: 'fillColor', type: 'string' },
         'selectedStrokeColor': { name: 'strokeColor', type: 'string' },
@@ -408,6 +463,11 @@ function handleSettingChange(event) {
             value = element.value;
     }
     
+    // Clamp the tension values
+    if (element.id === 'selectedEasingTension' || element.id === 'anchorScaleTension') {
+        value = constrain(value, 0, 1);
+    }
+    
     // Determine which items to update based on the current selection mode
     const itemsToUpdate = multiSelection.length > 0 
         ? multiSelection 
@@ -422,6 +482,14 @@ function handleSettingChange(event) {
             owner[mapping.name] = value;
         }
     });
+    
+    // Redraw curve editors if a tension value changed
+    if (element.id === 'selectedEasingTension' && easingCurveEditor) {
+        easingCurveEditor.redraw();
+    }
+    if (element.id === 'anchorScaleTension' && animCurveEditor) {
+        animCurveEditor.redraw();
+    }
 }
 
 /**
@@ -446,14 +514,14 @@ function updateSelectedItemUI() {
     shapeSection.style.display = 'none';
 
     if (itemsInSelection.length === 0) {
-        settingsHeader.textContent = 'Settings';
+        settingsHeader.textContent = 'Inspector';
         if (animCurveEditor) animCurveEditor.setActiveCurve(null);
         if (easingCurveEditor) easingCurveEditor.setActiveCurve(null);
     } else {
         if (multiSelection.length > 0) {
             settingsHeader.textContent = `(${multiSelection.length} Items Selected)`;
         } else {
-            settingsHeader.textContent = 'Settings';
+            settingsHeader.textContent = 'Inspector';
         }
 
         const owners = itemsInSelection.map(getOwnerOfItem).filter(Boolean);
@@ -491,16 +559,18 @@ function updateSelectedItemUI() {
             document.getElementById('selectedTotalFrames').value = firstSplineOwner.totalFrames;
             document.getElementById('selectedHideOnComplete').checked = firstSplineOwner.hideOnComplete;
             document.getElementById('selectedTension').value = firstSplineOwner.tension;
+            document.getElementById('selectedEasingTension').value = firstSplineOwner.easingTension || 0;
         } else if (anchorSection.style.display === 'block') {
             document.getElementById('anchorStartFrame').value = firstOwner.startFrame;
             document.getElementById('anchorTotalFrames').value = firstOwner.totalFrames;
             document.getElementById('anchorHideOnComplete').checked = firstOwner.hideOnComplete;
+            document.getElementById('anchorScaleTension').value = firstOwner.scaleTension || 0;
         }
 
         // CURVE EDITORS: Set the active curve based on the first item in the selection
-        if (animCurveEditor) animCurveEditor.setActiveCurve(firstOwner.scaleCurve);
+        if (animCurveEditor) animCurveEditor.setActiveCurve(firstOwner);
         if (easingCurveEditor) {
-            easingCurveEditor.setActiveCurve(hasSpline ? firstSplineOwner.easingCurve : null);
+            easingCurveEditor.setActiveCurve(hasSpline ? firstSplineOwner : null);
         }
     }
 
@@ -594,6 +664,7 @@ function addNewSpline() {
     strokeColor: '#ffffff', 
     strokeWeight: 0.5, 
     tension: 0,
+    easingTension: 0,
     hideOnComplete: true, 
     scaleCurve: [{x: 0, y: 0}, {x: 1, y: 0}], // Default scale is 1x (factor of 0)
     easingCurve: [{x: 0, y: 0}, {x: 1, y: 1}] // Default easing is linear
@@ -623,6 +694,7 @@ function addStaticShape() {
     totalFrames: exportFrames, 
     hideOnComplete: true, 
     isStatic: true,
+    scaleTension: 0,
     scaleCurve: [{x: 0, y: 0}, {x: 1, y: 0}]
   };
   const xOffset = (staticShapes.length % 5) * 20;
@@ -644,10 +716,18 @@ function resetSelectedCurve() {
         uniqueOwners.forEach(owner => {
             if (owner.hasOwnProperty('scaleCurve')) {
                 owner.scaleCurve = [{x: 0, y: 0}, {x: 1, y: 0}];
+                if (owner.isStatic) {
+                    owner.scaleTension = 0;
+                }
             }
         });
-        // Update the editor to show the curve of the first affected item
-        if (animCurveEditor) animCurveEditor.setActiveCurve([...uniqueOwners][0].scaleCurve);
+
+        const firstOwner = [...uniqueOwners][0];
+        if (animCurveEditor) animCurveEditor.setActiveCurve(firstOwner);
+
+        if (firstOwner.isStatic) {
+            document.getElementById('anchorScaleTension').value = 0;
+        }
         recordState();
     }
 }
@@ -659,21 +739,21 @@ function resetSelectedEasingCurve() {
     const itemsToUpdate = multiSelection.length > 0 ? multiSelection : [selectedSpline].filter(Boolean);
     const uniqueOwners = new Set(itemsToUpdate.map(getOwnerOfItem).filter(Boolean));
     
-    let firstEasingCurve = null;
-
     if (uniqueOwners.size > 0) {
         uniqueOwners.forEach(owner => {
             // Only apply to splines, which have easing curves
             if (owner.hasOwnProperty('easingCurve')) {
                 owner.easingCurve = [{x: 0, y: 0}, {x: 1, y: 1}];
-                if (!firstEasingCurve) {
-                    firstEasingCurve = owner.easingCurve;
-                }
+                owner.easingTension = 0; // Also reset tension
             }
         });
         
-        if (easingCurveEditor && firstEasingCurve) {
-            easingCurveEditor.setActiveCurve(firstEasingCurve);
+        if (easingCurveEditor) {
+            const firstSplineOwner = [...uniqueOwners].find(o => !o.isStatic);
+            if (firstSplineOwner) {
+                easingCurveEditor.setActiveCurve(firstSplineOwner);
+                document.getElementById('selectedEasingTension').value = 0;
+            }
         }
         recordState();
     }
@@ -773,7 +853,7 @@ function drawStaticShapes(c = window) {
     let finalSizeY = shape.shapeSizeY;
 
     if (playbackState.isVisible && animCurveEditor) {
-        let scaleMultiplier = animCurveEditor.getScaleAtTime(shape.scaleCurve, playbackState.rawProgress);
+        let scaleMultiplier = animCurveEditor.getScaleAtTime(shape, playbackState.rawProgress);
         finalSizeX *= scaleMultiplier;
         finalSizeY *= scaleMultiplier;
     }
@@ -895,7 +975,7 @@ function drawMovingShapes(c = window) {
     // Get scale from animation curve
     let scaleMultiplier = 1;
     if (animCurveEditor) {
-        scaleMultiplier = animCurveEditor.getScaleAtTime(spline.scaleCurve, state.rawProgress);
+        scaleMultiplier = animCurveEditor.getScaleAtTime(spline, state.rawProgress);
     }
 
     c.fill(spline.fillColor);
@@ -978,6 +1058,11 @@ function keyPressed() {
     // Check for the "Delete" key
     if (keyCode === DELETE) {
         removeSelectedItem();
+    }
+
+    if (keyCode === 32) { // 32 is the key code for the spacebar
+        togglePlayback();
+        return false; 
     }
 }
 
@@ -1595,23 +1680,36 @@ function addPointToSpline() {
 // ==============================
 // PREVIEW CONTROLS
 // ==============================
-function toggleLooping() {
-  loopingPreview = !loopingPreview;
-  isPlayingOnce = false;
-  if (loopingPreview) {
-    loopPreviewButton.textContent = 'Loop Preview: ON';
-    loopPreviewButton.style.backgroundColor = 'var(--accent-success)';
-    appStartTime = millis();
+function togglePlayback() {
+  isPlaying = !isPlaying;
+  const playPauseBtn = document.getElementById('playPauseBtn');
+
+  if (isPlaying) {
+    playPauseBtn.classList.add('is-playing');
+    playPauseBtn.style.backgroundImage = "url('icons/stop.svg')";
+    playPauseBtn.style.backgroundColor = 'var(--accent-danger)';
+    playbackStartTime = millis();
   } else {
-    loopPreviewButton.textContent = 'Loop Preview: OFF';
-    loopPreviewButton.style.backgroundColor = 'var(--accent-danger)';
+    playPauseBtn.classList.remove('is-playing');
+    playPauseBtn.style.backgroundImage = "url('icons/start.svg')";
+    playPauseBtn.style.backgroundColor = 'var(--accent-green)';
+    const exportFpsValue = parseInt(document.getElementById('exportFPS').value) || 16;
+    const exportTotalFramesValue = parseInt(document.getElementById('exportTotalFrames').value) || 80;
+    const mainTimelineDurationMs = (exportTotalFramesValue / exportFpsValue) * 1000;
+    timeOffset = parseFloat(timelineScrubber.value) * mainTimelineDurationMs;
   }
 }
 
-function playOnce() {
-  if (loopingPreview) toggleLooping();
-  isPlayingOnce = true;
-  appStartTime = millis();
+function toggleLoop() {
+  isLooping = !isLooping;
+  const loopBtn = document.getElementById('loopBtn');
+  if (isLooping) {
+    loopBtn.style.backgroundImage = "url('icons/loopOn.svg')";
+    loopBtn.style.backgroundColor = 'var(--accent-success)';
+  } else {
+    loopBtn.style.backgroundImage = "url('icons/loopOff.svg')";
+    loopBtn.style.backgroundColor = 'var(--accent-danger)';
+  }
 }
 
 // ==============================
@@ -1620,29 +1718,29 @@ function playOnce() {
 function applyEasing(progress, spline) {
     // Check if the easing curve editor and the specific curve exist
     if (easingCurveEditor && spline && spline.easingCurve) {
-        return easingCurveEditor.getEasingAtTime(spline.easingCurve, progress);
+        return easingCurveEditor.getEasingAtTime(spline, progress);
     }
     // Fallback to linear if the editor isn't available for some reason
     return progress;
 }
 
 function getObjectPlaybackState(obj) {
-  const elapsedTime = millis() - appStartTime;
-  let rawProgress = 0; 
-  let isVisible = false;
+  let currentTimeMs;
   const exportFps = parseInt(document.getElementById('exportFPS').value) || 16;
   const totalTimelineFrames = parseInt(document.getElementById('exportTotalFrames').value) || 80;
+  const mainTimelineDurationMs = (totalTimelineFrames / exportFps) * 1000;
 
-  let currentTimeMs;
-  if (isPlayingOnce) {
-    currentTimeMs = elapsedTime;
-  } else if (loopingPreview) {
-    const mainTimelineDurationMs = (totalTimelineFrames / exportFps) * 1000;
-    currentTimeMs = mainTimelineDurationMs > 0 ? elapsedTime % mainTimelineDurationMs : 0;
+  if (isPlaying) {
+    currentTimeMs = (millis() - playbackStartTime) + timeOffset;
+    if (isLooping) {
+      currentTimeMs = currentTimeMs % mainTimelineDurationMs;
+    }
   } else {
-    currentTimeMs = 0;
+    currentTimeMs = parseFloat(timelineScrubber.value) * mainTimelineDurationMs;
   }
   
+  let rawProgress = 0; 
+  let isVisible = false;
   const startMs = (obj.startFrame / exportFps) * 1000;
   const durationMs = (obj.totalFrames / exportFps) * 1000 || 1;
   const endMs = startMs + durationMs;
@@ -1768,6 +1866,7 @@ function updateCanvasSize() {
     originalImageDimensions.width = newWidth;
     originalImageDimensions.height = newHeight;
     windowResized();
+    document.getElementById('canvas-size-dialog').style.display = 'none';
     recordState();
   }
 }
@@ -1992,7 +2091,7 @@ function drawExportFrame(overallProgress) {
     
     if (isVisible) {
       const shapeProgress = constrain((exportCurrentFrame - shape.startFrame) / shape.totalFrames, 0, 1);
-      const scaleMultiplier = animCurveEditor.getScaleAtTime(shape.scaleCurve, shapeProgress);
+      const scaleMultiplier = animCurveEditor.getScaleAtTime(shape, shapeProgress);
 
       const scaleX = exportCanvas.width / width;
       const scaleY = exportCanvas.height / height;
@@ -2012,7 +2111,7 @@ function drawExportFrame(overallProgress) {
     if (exportCurrentFrame >= spline.startFrame && (exportCurrentFrame < endFrame || !spline.hideOnComplete)) {
       const splineProgress = constrain((exportCurrentFrame - spline.startFrame) / spline.totalFrames, 0, 1);
       const easedProgress = applyEasing(splineProgress, spline);
-      const scaleMultiplier = animCurveEditor.getScaleAtTime(spline.scaleCurve, splineProgress);
+      const scaleMultiplier = animCurveEditor.getScaleAtTime(spline, splineProgress);
 
       const totalLength = calculateSplineLength(spline);
       const targetDistance = easedProgress * totalLength;
