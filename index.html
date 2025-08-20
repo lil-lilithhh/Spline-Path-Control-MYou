@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Spline Editor</title>
+  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+  <script src="p5.js"></script>
+  <script src="sketch.js"></script>
+  <script src="curveEditor.js"></script>
+  <script src="easingCurveEditor.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="controls">
+    <div class="main-content">
+      <div id="spline-controls" class="spline-controls">
+        <h3>Inspector</h3>
+        
+        <div id="spline-settings-section" class="collapsible-section">
+            <button type="button" class="collapsible-header collapsed">Spline Settings</button>
+            <div class="collapsible-content">
+                <div class="control-group">
+                    <label for="selectedStartFrame">Start Frame:</label>
+                    <input type="number" id="selectedStartFrame" min="0" max="99999" step="1" value="0">
+                </div>
+                <div class="control-group">
+                    <label for="selectedTotalFrames">Total Frames:</label>
+                    <input type="number" id="selectedTotalFrames" min="1" max="99999" step="1" value="80">
+                </div>
+                <div class="control-group">
+                  <label for="selectedTension">Tension:</label>
+                  <input type="number" id="selectedTension" min="0" max="1" step="0.1" value="0">
+                </div>
+                <div class="control-group">
+                    <label for="selectedHideOnComplete">Hide When Done</label>
+                    <input type="checkbox" id="selectedHideOnComplete">
+                </div>
+                <div class="section-divider">Path Easing</div>
+                <div id="easing-curve-editor-container" class="curve-editor-container"></div>
+                <div class="control-group">
+                    <label for="selectedEasingTension">Easing Tension</label>
+                    <input type="number" id="selectedEasingTension" class="control-input" value="0" step="0.05" min="0" max="1" title="Controls the curvature of the path easing.">
+                </div>
+                <div class="control-group">
+                    <button id="resetEasingCurveBtn">Reset</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="anchor-settings-section" class="collapsible-section" style="display: none;">
+            <button type="button" class="collapsible-header collapsed">Anchor Settings</button>
+            <div class="collapsible-content">
+                <div class="control-group">
+                    <label for="anchorStartFrame">Start Frame:</label>
+                    <input type="number" id="anchorStartFrame" min="0" max="99999" step="1" value="0">
+                </div>
+                <div class="control-group">
+                    <label for="anchorTotalFrames">Total Frames:</label>
+                    <input type="number" id="anchorTotalFrames" min="1" max="99999" step="1" value="80">
+                </div>
+                <div class="control-group">
+                    <label for="anchorHideOnComplete">Hide When Done</label>
+                    <input type="checkbox" id="anchorHideOnComplete" checked>
+                </div>
+            </div>
+        </div>
+
+        <div id="shape-settings-section" class="collapsible-section">
+             <button type="button" class="collapsible-header collapsed">Shape Settings</button>
+             <div class="collapsible-content">
+                <div class="control-group">
+                  <label for="selectedType">Shape:</label>
+                  <select id="selectedType">
+                    <option value="circle">Circle</option>
+                    <option value="square">Square</option>
+                    <option value="triangle">Triangle</option>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <label for="selectedFillColor">Fill:</label>
+                  <input type="color" id="selectedFillColor" value="#000000">
+                </div>
+                <div class="control-group">
+                  <label for="selectedStrokeColor">Border:</label>
+                  <input type="color" id="selectedStrokeColor" value="#ffffff">
+                </div>
+                <div class="control-group">
+                  <label for="selectedStrokeWeight">Width:</label>
+                  <input type="number" id="selectedStrokeWeight" min="0" max="10" step="0.25" value="1">
+                </div>
+                <div class="control-group">
+                  <label>Size:</label>
+                  <div class="size-inputs">
+                    <input type="number" id="selectedSizeX" min="1" max="1000" value="15" title="Size X">
+                    <input type="number" id="selectedSizeY" min="1" max="1000" value="15" title="Size Y">
+                  </div>
+                </div>
+                <div class="section-divider">Scale Over Time</div>
+                <div id="curve-editor-container" class="curve-editor-container"></div>
+                <div class="control-group">
+                    <label for="anchorScaleTension">Scale Tension</label>
+                    <input type="number" id="anchorScaleTension" class="control-input" value="0" step="0.1" min="0" max="1" title="Controls the curvature of the scale animation.">
+                </div>
+                <div class="control-group">
+                    <button id="resetCurveBtn">Reset</button>
+                </div>
+            </div>
+        </div>
+      </div>
+      
+      <div class="canvas-area">
+        <div class="menu-bar">
+            <div class="menu-item">
+                <button class="menu-btn">Import</button>
+                <div class="menu-content">
+                    <a href="#" id="importImage">Import Image</a>
+                    <a href="#" id="loadCanvasBtn">Import Canvas</a>
+                </div>
+            </div>
+            <div class="menu-item">
+                <button class="menu-btn">Export</button>
+                <div class="menu-content">
+                    <a href="#" id="exportVideo">Export Video</a>
+                    <a href="#" id="exportCanvas">Export Canvas</a>
+                </div>
+            </div>
+            <div class="menu-item">
+                <button class="menu-btn">Canvas</button>
+                <div class="menu-content">
+                    <a href="#" id="canvasSize">Canvas Size...</a>
+                    <a href="#" id="resetCanvasSize">Reset Canvas</a>
+                    <a href="#" id="clearBg">Clear Image</a>
+                </div>
+            </div>
+            <div class="menu-item" style="display: none;">
+                <button class="menu-btn">View</button>
+                <div class="menu-content">
+                    <a href="#" id="themeToggle">Switch to Dark Mode</a>
+                </div>
+            </div>
+            <div class="menu-bar-right">
+            <div class="export-settings">
+              <div class="control-group">
+                <label for="exportFPS">FPS:</label>
+                <input type="number" id="exportFPS" min="1" max="120" value="16">
+              </div>
+              <div class="control-group">
+                <label for="exportTotalFrames">Length (in frames):</label>
+                <input type="number" id="exportTotalFrames" min="1" max="99999" step="1" value="80">
+              </div>
+            </div>
+        </div>
+        </div>
+        <div id="canvas-container">
+            <div id="export-overlay">
+              <div class="export-dialog">
+                <span id="cancelExport" class="close-button">&times;</span>
+                <h3 id="export-title">Creating Video...</h3>
+                <div class="progress-bar-container">
+                  <div id="progress-bar-fill"></div>
+                </div>
+                <p id="export-percentage">0%</p>
+                <p id="export-frame-count">Frame 0 of 0</p>
+              </div>
+            </div>
+        </div>
+        <div class="timeline-scrubber-container">
+          <span id="frameCounter" class="frame-counter">0 / 80</span>
+          <input type="range" min="0" max="1" value="0" step="0.001" class="timeline-scrubber" id="timelineScrubber">
+        </div>
+        
+      <div class="spline-management">
+        <button id="playPauseBtn" title="Start and stop the playback"></button>
+        <button id="loopBtn" title="Loop the playback"></button>
+        <div class="spacer"></div>
+         <button id="newSpline" type="button" class="spline-button" title="Add a spline to the canvas"></button>
+        <button id="addPoint" type="button" class="addpoint-button" title="Add point to selected spline"></button></button>
+        <button id="addShape" type="button" class="addanchor-button" title="Add an anchor to the canvas"></button></button></button>
+        <button id="cloneItem" type="button" class="clone-button" title="Clone the selected spline/anchor"></button>
+        <button id="deleteSpline" type="button" class="deletespline-button" title="Delete the selected spline"></button>
+        <button id="removePoint" type="button" class="deletepoint-button" title="Delete the selected anchor/point"></button></button>
+        <button id="undoBtn" type="button" class="undo-btn" title="Undo the last action"></button></button>
+        <button id="redoBtn" type="button" class="redo-btn" title="Redo the last action"></button></button>
+        <button id="clearAll" title="Clear all anchors and splines">Clear All</button>
+
+        <div class="spacer"></div>
+        
+       
+
+        <input type="file" id="bgImage" accept="image/*, .png" hidden>
+        <input type="file" id="loadCanvas" accept=".png" hidden>
+      </div>
+        
+        <div class="export-container">
+          <div class="export-left-panel">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="canvas-size-dialog" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Canvas Size</h2>
+      <div class="control-group">
+        <label for="canvasWidth">Width:</label>
+        <input type="number" id="canvasWidth" min="100" max="4000" value="1920">
+      </div>
+      <div class="control-group">
+        <label for="canvasHeight">Height:</label>
+        <input type="number" id="canvasHeight" min="100" max="4000" value="800">
+      </div>
+      <button id="updateCanvasSize">Update Canvas</button>
+    </div>
+  </div>
+</body>
+</html>
