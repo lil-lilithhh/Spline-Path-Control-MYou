@@ -14,7 +14,7 @@ Spline Path Control MYou is a simple tool inspired by Material You. It's designe
 ## ✨ Features
 
 * **Multi-Spline Editing:** Create multiple, independent spline paths
-* **Easy To Use Controls:** Quickly edit splines and points
+* **Intuitive Controls:** Quickly edit splines and points
 * **Playback scrubber:** Scrub through playback via the timeline and go frame-by-frame with the arrow keys
 * **Full Control of Splines and Shapes:**
     * **Start Frame:** Set a delay before a spline's animation begins.
