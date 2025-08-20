@@ -31,5 +31,5 @@ Simply plug the webm into the control_video or control_images VACE input using a
 
 ## Credits
 
-* **Author:** [WhatDreamsCost](https://github.com/WhatDreamsCost)
+* **Author:**  lil-lilithhh (they/them) & [WhatDreamsCost](https://github.com/WhatDreamsCost)
 * **Framework:** Built with [p5.js](https://p5js.org/).
