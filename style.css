@@ -22,7 +22,7 @@ html {
   --text-primary: #111827;         
   --text-secondary: #6b7280;       
   --border-color: #e5e7eb;         
-  --border-color-subtle: #f3f4f6;
+  --border-color-subtle: #e5e7eb;
   --link-color: #2563eb;
   --link-color-hover: #1d4ed8;
 
@@ -34,6 +34,8 @@ html {
   --accent-danger-hover: #b91c1c;
   --accent-neutral: #e5e7eb;
   --accent-neutral-hover: #d1d5db;
+    --accent-success: #19b461; /* Define success color */
+
 
   --glow-primary: color-mix(in srgb, var(--accent-primary) 35%, transparent);
   --glow-green: color-mix(in srgb, var(--accent-green) 35%, transparent);
@@ -46,31 +48,32 @@ html {
 
 body.dark-mode {
   /* Dark Theme Palette - Based on Reference Image */
-  --bg-main: #111317;              
-  --bg-surface: #1C1F24;           
-  --bg-controls: #1C1F24;          
-  --bg-canvas: #000000;
+  --bg-main: #271e19;              
+  --bg-surface: #312824;           
+  --bg-controls: #312824;          
+  --bg-canvas: #271e19;
   --text-primary: #e6e6e6;         
   --text-secondary: #9a9a9a;       
-  --border-color: #363A42;         
-  --border-color-subtle: #25282e;
-  --link-color: #00f5a0;
-  --link-color-hover: #31ffd1;
+  --border-color: #271e19;         
+  --border-color-subtle: #271e19;
+  --link-color: #97cda3;
+  --link-color-hover: #97cda3;
 
-  --accent-primary: #0ea5e9;       /* Primary is Blue */
-  --accent-primary-hover: #38bdf8;
-  --accent-green: #00f5a0;        /* Secondary is Green */
-  --accent-green-hover: #00d68e;
-  --accent-danger: #e84855;        
-  --accent-danger-hover: #e32d3a;
-  --accent-neutral: #363A42;
-  --accent-neutral-hover: #484d57;
+  --accent-primary: #fab981;       /* Primary is Blue */
+  --accent-primary-hover: #974960;
+  --accent-green: #97cda3;        /* Secondary is Green */
+  --accent-green-hover: #97cda3;
+  --accent-danger: #fab981;        
+  --accent-danger-hover: #643807;
+  --accent-neutral: #fab981;
+  --accent-neutral-hover: #fab981;
+    --accent-success: #97cda3; /* Define success color for dark mode */
   
   --glow-primary: color-mix(in srgb, var(--accent-primary) 25%, transparent);
   --glow-green: color-mix(in srgb, var(--accent-green) 20%, transparent);
   --glow-neutral: color-mix(in srgb, var(--text-secondary) 20%, transparent);
   
-  --scrollbar-thumb: #484d57;
+  --scrollbar-thumb: #fab981;
   --scrollbar-thumb-hover: #5f6570;
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
@@ -99,7 +102,7 @@ h3 {
   text-align: center;
   margin-bottom: 1.25rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #312824;
 }
 
 /* 4. Main Layout Structure */
@@ -129,7 +132,7 @@ h3 {
   padding: 1.25rem;
   background: var(--bg-controls);
   border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border: 1px solid #312824;
   flex-shrink: 0;
   transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
   overflow-y: auto;
@@ -261,7 +264,7 @@ input[type="file"]::file-selector-button {
   font-size: 0.875rem;
   font-weight: 500;
   background-color: var(--accent-neutral);
-  color: var(--text-primary);
+  color: #643807;
   margin-right: 1rem;
   transition: background-color var(--transition-speed);
 }
@@ -297,7 +300,7 @@ button:focus-visible {
     box-shadow: 0 0 8px 2px var(--glow-primary);
 }
 
-.spline-management { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.spline-management { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
 .spacer { flex-grow: 1; }
 
 .export-container {
@@ -326,111 +329,155 @@ button:focus-visible {
 .info-box a:hover { text-decoration: underline; color: var(--link-color-hover); }
 
 /* --- Blue (Light) / Green (Dark) Primary Buttons --- */
-#updateCanvasSize, #newSpline, #addPoint, #addShape, #exportVideo {
+#newSpline, #addPoint, #addShape {
   background-color: var(--accent-primary);
   color: #fff;
 }
-#updateCanvasSize:hover, #newSpline:hover, #addPoint:hover, #addShape:hover, #exportVideo:hover {
+#updateCanvasSize:hover, #newSpline:hover, #addPoint:hover, #addShape:hover {
   background-color: var(--accent-primary-hover);
   box-shadow: 0 0 15px 1px var(--glow-primary);
+}
+#updateCanvasSize {
+  background-color: var(--accent-primary);
+  color: #252f28;
 }
 body.dark-mode #updateCanvasSize,
 body.dark-mode #newSpline,
 body.dark-mode #addPoint,
 body.dark-mode #addShape,
-body.dark-mode #exportVideo {
-    background-color: var(--accent-green);
-    color: #000;
-}
 body.dark-mode #updateCanvasSize:hover,
 body.dark-mode #newSpline:hover,
 body.dark-mode #addPoint:hover,
 body.dark-mode #addShape:hover,
-body.dark-mode #exportVideo:hover {
+body.dark-mode #null:hover {
   background-color: var(--accent-green-hover);
   box-shadow: 0 0 15px 1px var(--glow-green);
 }
 
 /* --- Consistently Blue Buttons --- */
-#playOnce {
+#playPauseBtn {
   background-color: var(--accent-primary);
   color: #fff;
 }
-#playOnce:hover {
+#playPauseBtn:hover {
     background-color: var(--accent-primary-hover);
     box-shadow: 0 0 15px 1px var(--glow-primary);
 }
-body.dark-mode #playOnce {
-  background-color: var(--accent-primary);
-  color: #000000;
+body.dark-mode #playPauseBtn {
+  background-color: var(--accent-green);
+  color: #252f28;
 }
-body.dark-mode #playOnce:hover {
-  background-color: var(--accent-primary-hover);
+body.dark-mode #playPauseBtn:hover {
+  background-color: var(--accent-green-hover);
   box-shadow: 0 0 15px 1px var(--glow-primary);
 }
 
 /* --- Consistently Green Buttons --- */
-#loopPreview {
+#loopBtn {
     background-color: var(--accent-green);
     color: #fff;
 }
-#loopPreview:hover {
+#loopBtn:hover {
     background-color: var(--accent-green-hover);
     box-shadow: 0 0 15px 1px var(--glow-green);
 }
-body.dark-mode #loopPreview {
-    background-color: var(--accent-green);
+body.dark-mode #loopBtn {
+    background-color: var(--accent-success);
     color: #000;
 }
-body.dark-mode #loopPreview:hover {
+body.dark-mode #loopBtn:hover {
     background-color: var(--accent-green-hover);
     box-shadow: 0 0 15px 1px var(--glow-green);
 }
 
 /* --- Green (Light) / Blue (Dark) Buttons --- */
-#cloneItem, #exportCanvas {
+#cloneItem {
     background-color: var(--accent-green);
     color: #fff;
 }
-#cloneItem:hover, #exportCanvas:hover {
+#cloneItem:hover {
     background-color: var(--accent-green-hover);
     box-shadow: 0 0 15px 1px var(--glow-green);
 }
 body.dark-mode #cloneItem,
-body.dark-mode #exportCanvas {
-    background-color: var(--accent-primary);
-    color: #000000;
+body.dark-mode #null1 {
+    background-color: var(--accent-green);
+    color: #252f28;
 }
 body.dark-mode #cloneItem:hover,
-body.dark-mode #exportCanvas:hover {
-    background-color: var(--accent-primary-hover);
+body.dark-mode #null1:hover {
+    background-color: var(--accent-green-hover);
     box-shadow: 0 0 15px 1px var(--glow-primary);
 }
 
 
 /* --- Destructive / Danger Buttons --- */
-#cancelExport, #clearAll, #clearBg, #resetCanvasSize, #deleteSpline, #removePoint, #resetCurveBtn, #resetEasingCurveBtn {
-  background-color: transparent;
-  color: var(--accent-danger);
-  border-color: var(--accent-danger);
-}
-#cancelExport:hover, #clearAll:hover, #clearBg:hover, #resetCanvasSize:hover, #deleteSpline:hover, #removePoint:hover, #resetCurveBtn:hover, #resetEasingCurveBtn:hover {
+#clearAll, #deleteSpline, #removePoint, #resetCurveBtn, #resetEasingCurveBtn {
   background-color: var(--accent-danger);
-  color: #fff;
+  color: #643807;
+  border-color: transparent;
+}
+#clearAll:hover, #deleteSpline:hover, #removePoint:hover, #resetCurveBtn:hover, #resetEasingCurveBtn:hover {
+  background-color: var(--accent-danger);
+  color: #643807;
   border-color: var(--accent-danger);
   box-shadow: 0 0 15px 1px color-mix(in srgb, var(--accent-danger) 30%, transparent);
 }
 
 /* --- Neutral Buttons --- */
-#themeToggle, #loadCanvasBtn, #undoBtn, #redoBtn {
+#undoBtn, #redoBtn {
   background-color: var(--accent-neutral);
-  color: var(--text-primary);
+  color: #643807;
   border-color: var(--border-color);
 }
-#themeToggle:hover, #loadCanvasBtn:hover, #undoBtn:hover, #redoBtn:hover {
+
+#loadCanvasBtn,#importImage, #themeToggle, #exportVideo, #exportCanvas, #canvasSize, #resetCanvasSize, #clearBg{
+  background-color: var(--bg-surface);
+  color: #fff;
+  border-color: var(--border-color);
+}
+
+#loadCanvasBtn:hover,#importImage:hover, #themeToggle:hover, #exportVideo:hover, #exportCanvas:hover, #canvasSize:hover, #resetCanvasSize:hover, #clearBg:hover{
+  background-color: var(--accent-neutral-hover);
+  color: #643807;
+  border-color: var(--border-color);
+  box-shadow: 0 0 15px 1px var(--glow-neutral);
+}
+
+#undoBtn:hover, #redoBtn:hover {
   background-color: var(--accent-neutral-hover);
   border-color: var(--border-color);
   box-shadow: 0 0 15px 1px var(--glow-neutral);
+}
+
+#deleteSpline {
+  position: relative;
+  --clear-all-margin: 2rem;
+  margin-left: var(--clear-all-margin);
+}
+#deleteSpline::before {
+  content: '';
+  position: absolute;
+  left: calc((var(--clear-all-margin) + 0.75rem) / -2);
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
+  background-color: var(--border-color);
+}
+
+#undoBtn {
+  position: relative;
+  --clear-all-margin: 2rem;
+  margin-left: var(--clear-all-margin);
+}
+#undoBtn::before {
+  content: '';
+  position: absolute;
+  left: calc((var(--clear-all-margin) + 0.75rem) / -2);
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
+  background-color: var(--border-color);
 }
 
 #clearAll {
@@ -470,6 +517,7 @@ body.dark-mode #exportCanvas:hover {
   text-align: center;
   width: 100%;
   max-width: 480px;
+  position: relative;
 }
 .export-dialog h3 { font-size: 1.5rem; margin-bottom: 1.5rem; }
 .progress-bar-container {
@@ -553,4 +601,355 @@ body.dark-mode .collapsible-header:hover { background-color: var(--bg-surface); 
     width: 100%;
     height: 100%;
     cursor: default;
+}
+
+/* Menu Bar */
+.menu-bar {
+    display: flex;
+    align-items: center; /* This will vertically align the items */
+    background-color: var(--bg-surface);
+    padding: 0.35rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.menu-item {
+    position: relative;
+    display: inline-block;
+}
+
+.menu-btn {
+    background-color: transparent;
+    border: none;
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+.menu-content {
+    display: none;
+    position: absolute;
+    background-color: var(--bg-surface);
+    min-width: 160px;
+    box-shadow: var(--shadow-md);
+    z-index: 1;
+    border-radius: 8px;
+}
+
+.menu-content a {
+    color: var(--text-primary);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.menu-content a:hover {
+    background-color: var(--accent-neutral);
+}
+
+.menu-item:hover .menu-content {
+    display: block;
+}
+
+.menu-bar-right .export-settings {
+    margin-left: 1.3rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.menu-bar-right .control-group label {
+    min-width: auto; /* This will remove the fixed minimum width */
+    margin-right: -0.1rem; /* You can add a small margin for spacing */
+}
+
+.menu-bar-right .control-group {
+    margin-bottom: 0; /* Remove the bottom margin from the control groups */
+}
+
+.menu-bar-right {
+    display: flex;
+    align-items: center;
+    border-left: 1px solid var(--border-color); 
+    margin-left: 1rem; 
+}
+
+/* Modal for Canvas Size */
+.modal {
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: var(--bg-surface);
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  width: 80%;
+  max-width: 400px;
+  border-radius: 12px;
+}
+
+.close-button {
+  color: var(--text-secondary);
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 28px;
+  font-weight: bold;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: var(--text-primary);
+  background-color: var(--accent-neutral);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.spline-button {
+  background-image: url('icons/add_spline.svg');
+  background-size: 28px 28px; /* Adjust size */
+  background-repeat: no-repeat;
+  background-position: center; /* Position the icon */
+}
+
+.spline-button {
+  display: flex;
+  align-items: center; /* Center the icon and text vertically */
+  padding: 24px 24px; /* Add padding */
+  border: none; /* Remove default border */
+  background-color: #007bff; /* Button background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 24px; /* Rounded corners */
+}
+
+.addpoint-button {
+  background-image: url('icons/add_point.svg');
+  background-size: 28px 28px; /* Adjust size */
+  background-repeat: no-repeat;
+  background-position: center; /* Position the icon */
+}
+
+.addpoint-button {
+  display: flex;
+  align-items: center; /* Center the icon and text vertically */
+  padding: 24px 24px; /* Add padding */
+  border: none; /* Remove default border */
+  background-color: #007bff; /* Button background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 24px; /* Rounded corners */
+}
+
+.addanchor-button {
+  background-image: url('icons/add_anchor.svg');
+  background-size: 28px 28px; /* Adjust size */
+  background-repeat: no-repeat;
+  background-position: center; /* Position the icon */
+}
+
+.addanchor-button {
+  display: flex;
+  align-items: center; /* Center the icon and text vertically */
+  padding: 24px 24px; /* Add padding */
+  border: none; /* Remove default border */
+  background-color: #007bff; /* Button background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 24px; /* Rounded corners */
+}
+
+.clone-button {
+  background-image: url('icons/clone.svg');
+  background-size: 28px 28px; /* Adjust size */
+  background-repeat: no-repeat;
+  background-position: center; /* Position the icon */
+}
+
+.clone-button {
+  display: flex;
+  align-items: center; /* Center the icon and text vertically */
+  padding: 24px 24px; /* Add padding */
+  border: none; /* Remove default border */
+  background-color: #007bff; /* Button background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 24px; /* Rounded corners */
+}
+
+.deletespline-button {
+  background-image: url('icons/remove_spline.svg');
+  background-size: 28px 28px; /* Adjust size */
+  background-repeat: no-repeat;
+  background-position: center; /* Position the icon */
+}
+
+.deletespline-button {
+  display: flex;
+  align-items: center; /* Center the icon and text vertically */
+  padding: 24px 24px; /* Add padding */
+  border: none; /* Remove default border */
+  background-color: #007bff; /* Button background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 24px; /* Rounded corners */
+}
+
+.deletepoint-button {
+  background-image: url('icons/remove_anchor.svg');
+  background-size: 28px 28px; /* Adjust size */
+  background-repeat: no-repeat;
+  background-position: center; /* Position the icon */
+}
+
+.deletepoint-button {
+  display: flex;
+  align-items: center; /* Center the icon and text vertically */
+  padding: 24px 24px; /* Add padding */
+  border: none; /* Remove default border */
+  background-color: #007bff; /* Button background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 24px; /* Rounded corners */
+}
+
+.undo-btn {
+  background-image: url('icons/undo.svg');
+  background-size: 28px 28px; /* Adjust size */
+  background-repeat: no-repeat;
+  background-position: center; /* Position the icon */
+}
+
+.undo-btn {
+  display: flex;
+  align-items: center; /* Center the icon and text vertically */
+  padding: 24px 24px; /* Add padding */
+  border: none; /* Remove default border */
+  background-color: #007bff; /* Button background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 24px; /* Rounded corners */
+}
+
+.redo-btn {
+  background-image: url('icons/redo.svg');
+  background-size: 28px 28px; /* Adjust size */
+  background-repeat: no-repeat;
+  background-position: center; /* Position the icon */
+}
+
+.redo-btn {
+  display: flex;
+  align-items: center; /* Center the icon and text vertically */
+  padding: 24px 24px; /* Add padding */
+  border: none; /* Remove default border */
+  background-color: #007bff; /* Button background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 24px; /* Rounded corners */
+}
+
+/* Timeline Scrubber */
+.timeline-scrubber-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.frame-counter {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-family: monospace;
+  white-space: nowrap;
+  min-width: 80px; /* This gives the counter a fixed width */
+  text-align: center; /* This centers the text within the fixed width */
+}
+
+.timeline-scrubber {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  background: var(--border-color);
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  border-radius: 5px;
+}
+
+.timeline-scrubber:hover {
+  opacity: 1;
+}
+
+.timeline-scrubber::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--accent-primary);
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.timeline-scrubber::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--accent-primary);
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+#playPauseBtn {
+    background-color: var(--accent-green);
+    color: #fff;
+    background-image: url('icons/start.svg');
+    background-size: 28px 28px;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 24px; /* Make it square */
+    border-radius: 50%; /* Make it circular */
+}
+
+#playPauseBtn:hover {
+    background-color: var(--accent-primary-hover);
+    box-shadow: 0 0 15px 1px var(--glow-primary);
+}
+
+#playPauseBtn.is-playing:hover {
+    background-color: var(--accent-danger-hover);
+}
+
+#loopBtn {
+    background-color: var(--accent-green);
+    color: #fff;
+    background-image: url('icons/loopOn.svg');
+    background-size: 28px 28px;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 24px; /* Make it square */
+    border-radius: 50%; /* Make it circular */
+}
+
+#loopBtn:hover {
+    background-color: var(--accent-primary-hover);
+    box-shadow: 0 0 15px 1px var(--glow-primary);
+}
+
+#loopBtn.is-looping:hover {
+    background-color: var(--accent-danger-hover);
 }
