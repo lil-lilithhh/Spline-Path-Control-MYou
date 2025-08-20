@@ -27,7 +27,7 @@ Spline Path Control MYou is a simple tool inspired by Material You. It's designe
 
 ## ❓ How to Use With ComfyUI
 
-Simply plug the webm into the control_video or control_images VACE input using any load video node. There are example workflows [here](https://github.com/WhatDreamsCost/Spline-Path-Control/tree/main/example_workflows).
+Simply plug the webm into the control_video or control_images VACE input using any load video node. There are example workflows [here](https://github.com/lil-lilithhh/Spline-Path-Control-MYou/tree/main/example_workflows).
 
 ## Credits
 
