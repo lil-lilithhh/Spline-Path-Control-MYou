@@ -11,7 +11,7 @@ Spline Path Control MYou is a simple tool inspired by Material You. It's designe
 ---
 [![Spline Path Control Video](https://img.youtube.com/vi/viJkmzTwPuI/0.jpg)](https://www.youtube.com/watch?v=viJkmzTwPuI)
 
-## ✨ Features
+## Features
 
 * **Multi-Spline Editing:** Create multiple, independent spline paths
 * **Intuitive Controls:** Quickly edit splines and points
@@ -25,7 +25,7 @@ Spline Path Control MYou is a simple tool inspired by Material You. It's designe
 * **Reference Images:** Drag and drop or upload a background image to trace paths over an existing image.
 * **WebM Export:** Export your animation with a black background, perfect for use as a control video in VACE.
 
-## ❓ How to Use With ComfyUI
+## How to Use With ComfyUI
 
 Simply plug the webm into the control_video or control_images VACE input using any load video node. There are example workflows [here](https://github.com/lil-lilithhh/Spline-Path-Control-MYou/tree/main/example_workflows).
 
