@@ -8,6 +8,8 @@ let draggedStaticShape = null;
 let draggedSpline = null; 
 let dragStartPos = null; 
 let backgroundImg = null;
+let overlayImg = null;
+let blendAmount = 0.5;
 let selectedSpline = null;
 let selectedStaticShape = null;
 let selectedPoint = null;
@@ -145,8 +147,11 @@ function setupEventListeners() {
   document.getElementById('newSpline').addEventListener('click', addNewSpline);
   document.getElementById('clearAll').addEventListener('click', clearAll);
   document.getElementById('clearBg').addEventListener('click', () => { backgroundImg = null; document.getElementById('bgImage').value = ''; recordState(); });
-  document.getElementById('bgImage').addEventListener('change', handleSceneFile);
+  document.getElementById('clearOverlay').addEventListener('click', () => { overlayImg = null; document.getElementById('overlayImage').value = ''; recordState(); });
+  document.getElementById('bgImage').addEventListener('change', (e) => handleImageFile(e, (img) => backgroundImg = img));
+  document.getElementById('overlayImage').addEventListener('change', (e) => handleImageFile(e, (img) => overlayImg = img));
   document.getElementById('importImage').addEventListener('click', () => document.getElementById('bgImage').click());
+  document.getElementById('importOverlayImage').addEventListener('click', () => document.getElementById('overlayImage').click());
   document.getElementById('addPoint').addEventListener('click', addPointToSpline);
   document.getElementById('addShape').addEventListener('click', addStaticShape);
   document.getElementById('updateCanvasSize').addEventListener('click', updateCanvasSize);
@@ -169,6 +174,9 @@ function setupEventListeners() {
   // Add listeners for the reset buttons
   document.getElementById('resetCurveBtn').addEventListener('click', resetSelectedCurve);
   document.getElementById('resetEasingCurveBtn').addEventListener('click', resetSelectedEasingCurve);
+  
+  document.getElementById('blendSlider').addEventListener('input', (e) => blendAmount = parseFloat(e.target.value));
+  document.getElementById('swapImagesBtn').addEventListener('click', swapImages);
   
   // Add paste event listener
   window.addEventListener('paste', handlePaste);
@@ -264,6 +272,13 @@ function draw() {
   
   if (backgroundImg) {
     image(backgroundImg, 0, 0, width, height);
+  }
+
+  if (overlayImg) {
+    push();
+    tint(255, 255 * blendAmount);
+    image(overlayImg, 0, 0, width, height);
+    pop();
   }
 
   push();
@@ -809,6 +824,8 @@ function clearAll() {
   selectedStaticShape = null;
   selectedPoint = null;
   multiSelection = [];
+  backgroundImg = null;
+  overlayImg = null;
   appStartTime = millis();
   splineColorIndex = 0;
   recordState();
@@ -1063,6 +1080,14 @@ function keyPressed() {
     if (keyCode === 32) { // 32 is the key code for the spacebar
         togglePlayback();
         return false; 
+    }
+    
+    if (key.toLowerCase() === 'q') {
+        blendAmount = 0;
+        document.getElementById('blendSlider').value = 0;
+    } else if (key.toLowerCase() === 'w') {
+        blendAmount = 1;
+        document.getElementById('blendSlider').value = 1;
     }
 }
 
@@ -1899,6 +1924,27 @@ function handlePaste(event) {
     }
 }
 
+function resizeImageToCanvas(img, callback) {
+  const gfx = createGraphics(width, height);
+  gfx.image(img, 0, 0, width, height);
+  const resizedImg = gfx.get();
+  gfx.remove();
+  callback(resizedImg);
+}
+
+function handleImageFile(event, callback) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            loadImage(e.target.result, (loadedImg) => {
+                resizeImageToCanvas(loadedImg, callback);
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
 function handleSceneFile(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1938,7 +1984,7 @@ function loadSceneFromFile(file) {
 function loadAsRegularImage(file) {
     const reader = new FileReader();
     reader.onload = function(e) {
-        backgroundImg = loadImage(e.target.result,
+        loadImage(e.target.result,
             img => {
                 originalImageDimensions = { width: img.width, height: img.height };
                 trueOriginalImageDimensions = { width: img.width, height: img.height };
@@ -1947,7 +1993,10 @@ function loadAsRegularImage(file) {
                 document.getElementById('canvasHeight').value = img.height;
 
                 windowResized();
-                recordState();
+                resizeImageToCanvas(img, (resizedImg) => {
+                    backgroundImg = resizedImg;
+                    recordState();
+                });
             },
             err => console.error('Error loading image:', err)
         );
@@ -2042,6 +2091,10 @@ function exportScene() {
         URL.revokeObjectURL(a.href);
     });
     tempCanvas.remove();
+}
+
+function swapImages() {
+    [backgroundImg, overlayImg] = [overlayImg, backgroundImg];
 }
 
 // ==============
