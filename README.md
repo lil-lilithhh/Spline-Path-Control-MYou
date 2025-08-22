@@ -13,6 +13,7 @@ Added the following:
 * You can now add two images into the canvas to reference; an input image and an "overlay" image. You can change the transparency of the overlay image (blend).
    * This will make morphing animations much easier to create, since you can adjust the blend of the overlay image on the fly.
 * Added a new keybind: Q & W. Pressing `Q` will set the blend of the overlay image to 0. Pressing `W` will set the blend of the overlayed image to 100.
+   * This will make the morphing workflow much faster.
 * Added a swap button for the overlay. This button swaps the inital input image and the overlay image, which changes their order in the "layer stack". This can change the way opacity (blend) slider functions.
 * Fixed some buttons that had a hover effect constantly applied.
 
