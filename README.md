@@ -40,7 +40,7 @@ Added the following:
 
 ## How to Use with VACE
 
-Using ComfyUI, simply plug the webm into the control_video or control_images VACE input using any load video node. There are example workflows for comfy [here](https://github.com/lil-lilithhh/Spline-Path-Control-MYou/tree/main/example_workflows). Or if you prefer, use [Wan2GP](https://github.com/deepbeepmeep/Wan2GP) and use plug in the video into the "Control Video" input in VACE.
+Using ComfyUI, simply plug the webm into the control_video or control_images VACE input using any load video node. There are example workflows for comfy [here](https://github.com/lil-lilithhh/Spline-Path-Control-MYou/tree/main/example_workflows). Or if you prefer, use [Wan2GP](https://github.com/deepbeepmeep/Wan2GP) and plug in the video into the "Control Video" input in VACE.
 
 ## Credits
 
