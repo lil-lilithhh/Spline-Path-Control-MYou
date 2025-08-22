@@ -208,7 +208,7 @@ h3 {
 .size-inputs { display: flex; flex-grow: 1; gap: 0.5rem; }
 .size-inputs input { width: 100%; }
 
-input[type="number"], select {
+input[type="number"], select, input[type="range"] {
   flex-grow: 1;
   padding: 0.5rem 0.75rem;
   background-color: var(--bg-main);
@@ -218,7 +218,7 @@ input[type="number"], select {
   font-size: 0.875rem;
   transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
 }
-input:focus, select:focus {
+input:not(#timelineScrubber):focus, select:focus {
   outline: none;
   border-color: var(--accent-primary);
   box-shadow: 0 0 8px 0px var(--glow-primary);
@@ -226,7 +226,8 @@ input:focus, select:focus {
 
 input[type="number"]:hover,
 select:hover,
-input[type="color"]:hover {
+input[type="color"]:hover,
+input[type="range"]:not(#timelineScrubber):hover {
   border-color: var(--accent-primary);
   box-shadow: 0 0 8px 0px var(--glow-primary);
 }
@@ -300,6 +301,10 @@ button:focus-visible {
     box-shadow: 0 0 8px 2px var(--glow-primary);
 }
 
+#swapImagesBtn {
+    flex-grow: 0 !important;
+}
+
 .spline-management { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
 .spacer { flex-grow: 1; }
 
@@ -344,12 +349,15 @@ button:focus-visible {
 body.dark-mode #updateCanvasSize,
 body.dark-mode #newSpline,
 body.dark-mode #addPoint,
-body.dark-mode #addShape,
+body.dark-mode #addShape {
+  background-color: var(--accent-green);
+  color: #252f28;
+}
+
 body.dark-mode #updateCanvasSize:hover,
 body.dark-mode #newSpline:hover,
 body.dark-mode #addPoint:hover,
-body.dark-mode #addShape:hover,
-body.dark-mode #null:hover {
+body.dark-mode #addShape:hover {
   background-color: var(--accent-green-hover);
   box-shadow: 0 0 15px 1px var(--glow-green);
 }
@@ -425,26 +433,26 @@ body.dark-mode #null1:hover {
 }
 
 /* --- Neutral Buttons --- */
-#undoBtn, #redoBtn {
+#undoBtn, #redoBtn, #swapImagesBtn {
   background-color: var(--accent-neutral);
   color: #643807;
   border-color: var(--border-color);
 }
 
-#loadCanvasBtn,#importImage, #themeToggle, #exportVideo, #exportCanvas, #canvasSize, #resetCanvasSize, #clearBg{
+#loadCanvasBtn,#importImage, #themeToggle, #exportVideo, #exportCanvas, #canvasSize, #resetCanvasSize, #clearBg, #clearOverlay, #importOverlayImage {
   background-color: var(--bg-surface);
   color: #fff;
   border-color: var(--border-color);
 }
 
-#loadCanvasBtn:hover,#importImage:hover, #themeToggle:hover, #exportVideo:hover, #exportCanvas:hover, #canvasSize:hover, #resetCanvasSize:hover, #clearBg:hover{
+#loadCanvasBtn:hover,#importImage:hover, #themeToggle:hover, #exportVideo:hover, #exportCanvas:hover, #canvasSize:hover, #resetCanvasSize:hover, #clearBg:hover, #clearOverlay:hover, #importOverlayImage:hover{
   background-color: var(--accent-neutral-hover);
   color: #643807;
   border-color: var(--border-color);
   box-shadow: 0 0 15px 1px var(--glow-neutral);
 }
 
-#undoBtn:hover, #redoBtn:hover {
+#undoBtn:hover, #redoBtn:hover, #swapImagesBtn:hover {
   background-color: var(--accent-neutral-hover);
   border-color: var(--border-color);
   box-shadow: 0 0 15px 1px var(--glow-neutral);
@@ -952,4 +960,19 @@ body.dark-mode .collapsible-header:hover { background-color: var(--bg-surface); 
 
 #loopBtn.is-looping:hover {
     background-color: var(--accent-danger-hover);
+}
+
+/* Custom styles for the blend slider */
+#blendSlider::-webkit-slider-runnable-track {
+  background: #fab981;
+}
+
+#blendSlider::-webkit-slider-thumb {
+  background: #ffffff;
+  border: 2px solid #fab981;
+}
+
+#blendSlider::-moz-range-thumb {
+  background: #fab981;
+  border: 4px solid #fab981;
 }
