@@ -113,6 +113,7 @@
                 <button class="menu-btn">Import</button>
                 <div class="menu-content">
                     <a href="#" id="importImage">Import Image</a>
+                    <a href="#" id="importOverlayImage">Import Overlay Image</a>
                     <a href="#" id="loadCanvasBtn">Import Canvas</a>
                 </div>
             </div>
@@ -129,6 +130,7 @@
                     <a href="#" id="canvasSize">Canvas Size...</a>
                     <a href="#" id="resetCanvasSize">Reset Canvas</a>
                     <a href="#" id="clearBg">Clear Image</a>
+                    <a href="#" id="clearOverlay">Clear Overlay</a>
                 </div>
             </div>
             <div class="menu-item" style="display: none;">
@@ -146,6 +148,11 @@
               <div class="control-group">
                 <label for="exportTotalFrames">Length (in frames):</label>
                 <input type="number" id="exportTotalFrames" min="1" max="99999" step="1" value="80">
+              </div>
+              <div class="control-group">
+                <label for="blendSlider">Blend:</label>
+                <input type="range" id="blendSlider" min="0" max="1" value="0.5" step="0.01">
+                <button id="swapImagesBtn">Swap</button>
               </div>
             </div>
         </div>
@@ -187,6 +194,7 @@
        
 
         <input type="file" id="bgImage" accept="image/*, .png" hidden>
+        <input type="file" id="overlayImage" accept="image/*, .png" hidden>
         <input type="file" id="loadCanvas" accept=".png" hidden>
       </div>
         
