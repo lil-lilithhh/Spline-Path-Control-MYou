@@ -1,4 +1,4 @@
-# Spline Path Control MYou v2.5
+# Spline Path Control MYou v2.6
 
 <img width="1852" height="994" alt="user-interface-skateboard" src="https://github.com/user-attachments/assets/835b3068-85f3-41d4-b8ea-05f62c550a11" />
 
@@ -8,13 +8,18 @@
 
 Spline Path Control MYou is a simple tool inspired by Material You. It's designed to make it easy to create motion controls, which allows you to create and animate shapes that follow splines, and then export the result as a `.webm` video file. Input the motion paths into VACE to control the motion of anything (camera movement, objects, humans etc) all without extra prompting.
 
+
+### Update v2.6:
+* Changed the logic of "Start Frame" and "Total Frames" to just "Start Frame" and "End Frame". Makes it so much easier to change the duration of a spline.
+* Added new keybinds: I & O. Pressing `I` will set the start frame for the selected spline(s) to the current frame in the timeline. Pressing `O` will set the start frame for the selected spline(s) to the current frame in the timeline (similar concept to "in-and-out points" found in video editors).  
+
 ### Update v2.5:
 
 Added the following:
 * You can now add two images into the canvas to reference; an input image and an "overlay" image. You can change the transparency of the overlay image (blend).
    * This will make morphing animations much easier to create, since you can adjust the blend of the overlay image on the fly.
    * Bringing the slider to the left means you see the underlying layer, and bringing the slider to the right means you see the overlayed layer.
-* Added a new keybind: Q & W. Pressing `Q` will set the blend of the overlay image to 0%. Pressing `W` will set the blend of the overlayed image to 100%.
+* Added a new keybinds: Q & W. Pressing `Q` will set the blend of the overlay image to 0%. Pressing `W` will set the blend of the overlayed image to 100%.
    * This will make the morphing workflow much faster.
 * Added a swap button for the overlay. This button swaps the inital input image and the overlay image, which changes their order in the "layer stack". This can change the way opacity (blend) slider functions.
 * Fixed some buttons that had a hover effect constantly applied.
