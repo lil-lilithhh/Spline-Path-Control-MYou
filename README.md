@@ -1,6 +1,7 @@
 # Spline Path Control MYou v2.6
 
-<img width="1852" height="994" alt="user-interface-skateboard" src="https://github.com/user-attachments/assets/835b3068-85f3-41d4-b8ea-05f62c550a11" />
+<img width="1852" height="994" alt="user-interface-skateboard" src="https://github.com/user-attachments/assets/589a8d6f-885e-4796-ac6c-3d9c60896375" />
+
 
 
 
