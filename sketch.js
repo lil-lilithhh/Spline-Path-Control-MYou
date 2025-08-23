@@ -206,9 +206,9 @@ function setupEventListeners() {
   // NEW: Consolidated event listeners for multi-edit
   const allControls = [
       // Spline Settings
-      'selectedStartFrame', 'selectedTotalFrames', 'selectedTension', 'selectedEasingTension', 'selectedHideOnComplete',
+      'selectedStartFrame', 'selectedEndFrame', 'selectedTension', 'selectedEasingTension', 'selectedHideOnComplete',
       // Anchor Settings
-      'anchorStartFrame', 'anchorTotalFrames', 'anchorHideOnComplete', 'anchorScaleTension',
+      'anchorStartFrame', 'anchorEndFrame', 'anchorHideOnComplete', 'anchorScaleTension',
       // Shape Settings
       'selectedType', 'selectedFillColor', 'selectedStrokeColor', 'selectedStrokeWeight',
       'selectedSizeX', 'selectedSizeY'
@@ -444,12 +444,12 @@ function handleSettingChange(event) {
     const element = event.target;
     const propertyMap = {
         'selectedStartFrame': { name: 'startFrame', type: 'int' },
-        'selectedTotalFrames': { name: 'totalFrames', type: 'int' },
+        'selectedEndFrame': { name: 'endFrame', type: 'int' },
         'selectedTension': { name: 'tension', type: 'float' },
         'selectedEasingTension': { name: 'easingTension', type: 'float' },
         'selectedHideOnComplete': { name: 'hideOnComplete', type: 'bool' },
         'anchorStartFrame': { name: 'startFrame', type: 'int' },
-        'anchorTotalFrames': { name: 'totalFrames', type: 'int' },
+        'anchorEndFrame': { name: 'endFrame', type: 'int' },
         'anchorHideOnComplete': { name: 'hideOnComplete', type: 'bool' },
         'anchorScaleTension': { name: 'scaleTension', type: 'float' },
         'selectedType': { name: 'shapeType', type: 'string' },
@@ -492,8 +492,15 @@ function handleSettingChange(event) {
     const uniqueOwners = new Set(itemsToUpdate.map(getOwnerOfItem).filter(Boolean));
     
     uniqueOwners.forEach(owner => {
-        // Only apply the property if the owner actually has it
-        if (owner.hasOwnProperty(mapping.name)) {
+        if (mapping.name === 'endFrame') {
+            if (owner.hasOwnProperty('startFrame') && owner.hasOwnProperty('totalFrames')) {
+                owner.totalFrames = value - owner.startFrame;
+            }
+        } else if (mapping.name === 'startFrame') {
+            const endFrame = owner.startFrame + owner.totalFrames; // old end frame
+            owner.startFrame = value;
+            owner.totalFrames = endFrame - owner.startFrame;
+        } else if (owner.hasOwnProperty(mapping.name)) {
             owner[mapping.name] = value;
         }
     });
@@ -571,13 +578,13 @@ function updateSelectedItemUI() {
         // Spline/Anchor Settings
         if (splineSection.style.display === 'block') {
             document.getElementById('selectedStartFrame').value = firstSplineOwner.startFrame;
-            document.getElementById('selectedTotalFrames').value = firstSplineOwner.totalFrames;
+            document.getElementById('selectedEndFrame').value = firstSplineOwner.startFrame + firstSplineOwner.totalFrames;
             document.getElementById('selectedHideOnComplete').checked = firstSplineOwner.hideOnComplete;
             document.getElementById('selectedTension').value = firstSplineOwner.tension;
             document.getElementById('selectedEasingTension').value = firstSplineOwner.easingTension || 0;
         } else if (anchorSection.style.display === 'block') {
             document.getElementById('anchorStartFrame').value = firstOwner.startFrame;
-            document.getElementById('anchorTotalFrames').value = firstOwner.totalFrames;
+            document.getElementById('anchorEndFrame').value = firstOwner.startFrame + firstOwner.totalFrames;
             document.getElementById('anchorHideOnComplete').checked = firstOwner.hideOnComplete;
             document.getElementById('anchorScaleTension').value = firstOwner.scaleTension || 0;
         }
@@ -1058,38 +1065,67 @@ function toggleSplineInMultiSelection(spline) {
 // INTERACTION
 // ==============
 function keyPressed() {
-    // Check if an input field is focused. If so, don't trigger hotkeys.
     const activeElement = document.activeElement;
     if (activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "SELECT")) {
         return;
     }
-    
+
     if (keyIsDown(CONTROL)) {
         if (key.toLowerCase() === 'z') {
             undo();
         } else if (key.toLowerCase() === 'y') {
             redo();
         }
-    }
-    
-    // Check for the "Delete" key
-    if (keyCode === DELETE) {
-        removeSelectedItem();
+        return;
     }
 
-    if (keyCode === 32) { // 32 is the key code for the spacebar
+    if (keyCode === DELETE) {
+        removeSelectedItem();
+    } else if (keyCode === 32) {
         togglePlayback();
-        return false; 
-    }
-    
-    if (key.toLowerCase() === 'q') {
+        return false;
+    } else if (key.toLowerCase() === 'q') {
         blendAmount = 0;
         document.getElementById('blendSlider').value = 0;
     } else if (key.toLowerCase() === 'w') {
         blendAmount = 1;
         document.getElementById('blendSlider').value = 1;
+    } else if (key.toLowerCase() === 'i' || key.toLowerCase() === 'o') {
+        const exportFpsValue = parseInt(document.getElementById('exportFPS').value) || 16;
+        const exportTotalFramesValue = parseInt(document.getElementById('exportTotalFrames').value) || 80;
+        const mainTimelineDurationMs = (exportTotalFramesValue / exportFpsValue) * 1000;
+        const elapsedTime = parseFloat(timelineScrubber.value) * mainTimelineDurationMs;
+        const currentFrame = Math.floor((elapsedTime / mainTimelineDurationMs) * exportTotalFramesValue);
+
+        const itemsToUpdate = multiSelection.length > 0
+            ? multiSelection
+            : [selectedSpline, selectedStaticShape].filter(Boolean);
+        const uniqueOwners = new Set(itemsToUpdate.map(getOwnerOfItem).filter(Boolean));
+
+        if (uniqueOwners.size > 0) {
+            uniqueOwners.forEach(owner => {
+                if (key.toLowerCase() === 'i') { // Set In-Point
+                    const endFrame = owner.startFrame + owner.totalFrames;
+                    owner.startFrame = currentFrame;
+                    if (currentFrame >= endFrame) {
+                        owner.totalFrames = 1;
+                    } else {
+                        owner.totalFrames = endFrame - currentFrame;
+                    }
+                } else { // Set Out-Point
+                    if (currentFrame <= owner.startFrame) {
+                        owner.totalFrames = 1;
+                    } else {
+                        owner.totalFrames = currentFrame - owner.startFrame;
+                    }
+                }
+            });
+            updateSelectedItemUI();
+            recordState();
+        }
     }
 }
+
 
 function mousePressed(event) {
     // First, check if the mouse press was on the canvas itself.
