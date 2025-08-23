@@ -8,6 +8,9 @@
 
 Spline Path Control MYou is a simple tool inspired by Material You. It's designed to make it easy to create motion controls, which allows you to create and animate shapes that follow splines, and then export the result as a `.webm` video file. Input the motion paths into VACE to control the motion of anything (camera movement, objects, humans etc) all without extra prompting.
 
+### Update v2.7:
+* Removed the `Length (in frames)` input at the top and replaced its functionality with an input that sits left to the timeline scrubber. Now there's no duplication of the length of the animation; now just adjust the length in one spot!
+
 
 ### Update v2.6:
 * Changed the logic of "Start Frame" and "Total Frames" to just "Start Frame" and "End Frame". Makes it so much easier to change the duration of a spline.
