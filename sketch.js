@@ -32,7 +32,7 @@ let canvas;
 let appStartTime;
 let themeToggleButton;
 let exportOverlay, progressBarFill, exportPercentage, exportFrameCount;
-let timelineScrubber, frameCounter;
+let timelineScrubber, frameCounter, totalFramesInput;
 let isScrubbing = false;
 let playbackStartTime = 0;
 let timeOffset = 0;
@@ -79,7 +79,8 @@ function setup() {
   exportPercentage = document.getElementById('export-percentage');
   exportFrameCount = document.getElementById('export-frame-count');
   timelineScrubber = document.getElementById('timelineScrubber');
-  frameCounter = document.getElementById('frameCounter');
+  frameCounter = document.getElementById('current-frame');
+  totalFramesInput = document.getElementById('total-frames');
   
   // Default to dark mode if no theme is saved or if the saved theme is 'dark'
   const savedTheme = localStorage.getItem('splineEditorTheme');
@@ -192,7 +193,7 @@ function setupEventListeners() {
   timelineScrubber.addEventListener('mouseup', () => {
     isScrubbing = false;
     const exportFpsValue = parseInt(document.getElementById('exportFPS').value) || 16;
-    const exportTotalFramesValue = parseInt(document.getElementById('exportTotalFrames').value) || 80;
+    const exportTotalFramesValue = parseInt(totalFramesInput.textContent) || 80;
     const mainTimelineDurationMs = (exportTotalFramesValue / exportFpsValue) * 1000;
     timeOffset = parseFloat(timelineScrubber.value) * mainTimelineDurationMs;
   });
@@ -223,7 +224,21 @@ function setupEventListeners() {
   });
 
   document.getElementById('exportFPS').addEventListener('change', recordState);
-  document.getElementById('exportTotalFrames').addEventListener('change', recordState);
+  totalFramesInput.addEventListener('blur', () => {
+      let value = parseInt(totalFramesInput.textContent, 10);
+      if (isNaN(value) || value < 1) {
+          value = 80; // Reset to default if invalid
+      }
+      totalFramesInput.textContent = value;
+      recordState();
+  });
+
+  totalFramesInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+          e.preventDefault();
+          totalFramesInput.blur();
+      }
+  });
 
 
   const canvasContainer = document.getElementById('canvas-container');
@@ -231,7 +246,7 @@ function setupEventListeners() {
   canvasContainer.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); canvasContainer.classList.remove('dragging-over'); });
   canvasContainer.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); canvasContainer.classList.remove('dragging-over'); });
 
-  setupDraggableInputs();
+  setupDraggableElements();
   
   // Add a small delay to ensure editor instances are created before we override their callbacks.
   setTimeout(() => {
@@ -294,7 +309,7 @@ function draw() {
   drawSelectionBox();
 
   const exportFpsValue = parseInt(document.getElementById('exportFPS').value) || 16;
-  const exportTotalFramesValue = parseInt(document.getElementById('exportTotalFrames').value) || 80;
+  const exportTotalFramesValue = parseInt(totalFramesInput.textContent) || 80;
   const mainTimelineDurationMs = (exportTotalFramesValue / exportFpsValue) * 1000;
   let elapsedTime;
   
@@ -311,7 +326,7 @@ function draw() {
   }
 
   let currentFrame = Math.floor((elapsedTime / mainTimelineDurationMs) * exportTotalFramesValue);
-  frameCounter.textContent = `${String(currentFrame).padStart(2, '0')} / ${exportTotalFramesValue}`;
+  frameCounter.textContent = `${String(currentFrame).padStart(2, '0')}`;
 
   drawMovingShapes();
   if (draggedPoint) { drawDragIndicator(); }
@@ -340,7 +355,7 @@ function captureState() {
         splines: serializableSplines,
         staticShapes: serializableStaticShapes,
         exportFPS: parseInt(document.getElementById('exportFPS').value),
-        exportTotalFrames: parseInt(document.getElementById('exportTotalFrames').value),
+        exportTotalFrames: parseInt(totalFramesInput.textContent),
         splineColorIndex: splineColorIndex,
     };
 }
@@ -362,7 +377,7 @@ function applyState(state) {
     });
 
     document.getElementById('exportFPS').value = state.exportFPS;
-    document.getElementById('exportTotalFrames').value = state.exportTotalFrames;
+    totalFramesInput.textContent = state.exportTotalFrames;
     splineColorIndex = state.splineColorIndex;
 
     selectedSpline = null;
@@ -675,7 +690,7 @@ function handleEasingCurveChange(isFinal = true) {
 // ITEM CREATION AND SELECTION LOGIC
 // ======================================
 function addNewSpline() {
-  const exportFrames = parseInt(document.getElementById('exportTotalFrames').value) || 80;
+  const exportFrames = parseInt(totalFramesInput.textContent) || 80;
   const defaultSettings = {
     startFrame: 0, 
     totalFrames: exportFrames, 
@@ -704,7 +719,7 @@ function addNewSpline() {
 }
 
 function addStaticShape() {
-  const exportFrames = parseInt(document.getElementById('exportTotalFrames').value) || 80;
+  const exportFrames = parseInt(totalFramesInput.textContent) || 80;
   const defaultSettings = {
     shapeSizeX: 15, 
     shapeSizeY: 15, 
@@ -1066,7 +1081,7 @@ function toggleSplineInMultiSelection(spline) {
 // ==============
 function keyPressed() {
     const activeElement = document.activeElement;
-    if (activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "SELECT")) {
+    if (activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "SELECT" || activeElement.isContentEditable)) {
         return;
     }
 
@@ -1092,7 +1107,7 @@ function keyPressed() {
         document.getElementById('blendSlider').value = 1;
     } else if (key.toLowerCase() === 'i' || key.toLowerCase() === 'o') {
         const exportFpsValue = parseInt(document.getElementById('exportFPS').value) || 16;
-        const exportTotalFramesValue = parseInt(document.getElementById('exportTotalFrames').value) || 80;
+        const exportTotalFramesValue = parseInt(totalFramesInput.textContent) || 80;
         const mainTimelineDurationMs = (exportTotalFramesValue / exportFpsValue) * 1000;
         const elapsedTime = parseFloat(timelineScrubber.value) * mainTimelineDurationMs;
         const currentFrame = Math.floor((elapsedTime / mainTimelineDurationMs) * exportTotalFramesValue);
@@ -1755,7 +1770,7 @@ function togglePlayback() {
     playPauseBtn.style.backgroundImage = "url('icons/start.svg')";
     playPauseBtn.style.backgroundColor = 'var(--accent-green)';
     const exportFpsValue = parseInt(document.getElementById('exportFPS').value) || 16;
-    const exportTotalFramesValue = parseInt(document.getElementById('exportTotalFrames').value) || 80;
+    const exportTotalFramesValue = parseInt(totalFramesInput.textContent) || 80;
     const mainTimelineDurationMs = (exportTotalFramesValue / exportFpsValue) * 1000;
     timeOffset = parseFloat(timelineScrubber.value) * mainTimelineDurationMs;
   }
@@ -1788,7 +1803,7 @@ function applyEasing(progress, spline) {
 function getObjectPlaybackState(obj) {
   let currentTimeMs;
   const exportFps = parseInt(document.getElementById('exportFPS').value) || 16;
-  const totalTimelineFrames = parseInt(document.getElementById('exportTotalFrames').value) || 80;
+  const totalTimelineFrames = parseInt(totalFramesInput.textContent) || 80;
   const mainTimelineDurationMs = (totalTimelineFrames / exportFps) * 1000;
 
   if (isPlaying) {
@@ -2150,7 +2165,7 @@ function startExport() {
   progressBarFill.style.width = '0%';
   exportPercentage.textContent = '0%';
   exportFPS = parseInt(document.getElementById('exportFPS').value);
-  exportTotalFrames = parseInt(document.getElementById('exportTotalFrames').value);
+  exportTotalFrames = parseInt(totalFramesInput.textContent);
   exportDuration = exportTotalFrames / exportFPS;
 
   exportFrameCount.textContent = `Frame 0 of ${exportTotalFrames}`;
@@ -2291,36 +2306,41 @@ function cleanupExport() {
 
 // --- MODIFICATION: Add logic for draggable number inputs with double-click select ---
 /**
- * Attaches event listeners to all number inputs to allow
+ * Attaches event listeners to all number inputs and draggable spans to allow
  * changing their value by dragging the mouse horizontally,
  * and selecting all text on double-click.
  */
-function setupDraggableInputs() {
-    const numberInputs = document.querySelectorAll('input[type="number"]');
+function setupDraggableElements() {
+    const draggableElements = document.querySelectorAll('input[type="number"], .draggable-span');
 
-    numberInputs.forEach(input => {
+    draggableElements.forEach(element => {
         let isDragging = false;
         let startX;
         let startValue;
-        let lastDownTime = 0; // Tracks the time of the last mousedown event
+        let lastDownTime = 0;
 
         const onMouseDown = (e) => {
             const currentTime = performance.now();
 
-            // If the time between this click and the last is less than a threshold (e.g., 300ms),
-            // treat it as a double-click.
             if (currentTime - lastDownTime < 300) {
-                input.select(); // Select all text in the input
-                lastDownTime = 0; // Reset the timer to prevent a third click from being a double-click
-                e.preventDefault(); // Prevent the browser's default double-click behavior (like highlighting a word)
-                return; // Exit the function to prevent starting a drag
+                if (element.tagName === 'INPUT') {
+                    element.select();
+                } else {
+                    const selection = window.getSelection();
+                    const range = document.createRange();
+                    range.selectNodeContents(element);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+                lastDownTime = 0;
+                e.preventDefault();
+                return;
             }
-            lastDownTime = currentTime; // Record the time of this click
+            lastDownTime = currentTime;
 
-            // --- Standard Drag Initiation ---
             isDragging = true;
             startX = e.clientX;
-            startValue = parseFloat(input.value) || 0;
+            startValue = parseFloat(element.value || element.textContent) || 0;
             document.body.style.cursor = 'ew-resize';
             
             document.addEventListener('mousemove', onMouseMove);
@@ -2333,11 +2353,11 @@ function setupDraggableInputs() {
             e.preventDefault();
 
             const dx = e.clientX - startX;
-            const step = parseFloat(input.step) || 1;
-            const min = parseFloat(input.min);
-            const max = parseFloat(input.max);
+            const step = parseFloat(element.step) || 1;
+            const min = parseFloat(element.min) || 1;
+            const max = parseFloat(element.max) || 99999;
             
-            const sensitivity = 5; // Lower number = more sensitive
+            const sensitivity = 5;
             const valueChange = Math.round(dx / sensitivity) * step;
             let newValue = startValue + valueChange;
 
@@ -2347,9 +2367,13 @@ function setupDraggableInputs() {
             const stepString = step.toString();
             const decimalPlaces = stepString.includes('.') ? stepString.split('.')[1].length : 0;
             
-            input.value = newValue.toFixed(decimalPlaces);
+            if (element.tagName === 'INPUT') {
+                element.value = newValue.toFixed(decimalPlaces);
+            } else {
+                element.textContent = newValue.toFixed(decimalPlaces);
+            }
             
-            input.dispatchEvent(new Event('input', { bubbles: true }));
+            element.dispatchEvent(new Event('input', { bubbles: true }));
         };
 
         const onMouseUp = () => {
@@ -2360,10 +2384,13 @@ function setupDraggableInputs() {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
                 
-                input.dispatchEvent(new Event('change', { bubbles: true }));
+                element.dispatchEvent(new Event('change', { bubbles: true }));
+                if (element.id === 'total-frames') {
+                    element.dispatchEvent(new Event('blur', { bubbles: true }));
+                }
             }
         };
 
-        input.addEventListener('mousedown', onMouseDown);
+        element.addEventListener('mousedown', onMouseDown);
     });
 }
