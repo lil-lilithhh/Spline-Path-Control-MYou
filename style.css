@@ -887,6 +887,23 @@ body.dark-mode .collapsible-header:hover { background-color: var(--bg-surface); 
   text-align: center; /* This centers the text within the fixed width */
 }
 
+#total-frames:focus {
+  outline: 1px solid var(--accent-primary);
+  background-color: var(--bg-surface);
+  padding: 2px 5px;
+  border-radius: 8px;
+}
+
+#total-frames {
+  background-color: var(--bg-main);
+  padding: 2px 5px;
+  border-radius: 8px;
+}
+
+.draggable-span {
+    cursor: ew-resize;
+}
+
 .timeline-scrubber {
   width: 100%;
   -webkit-appearance: none;
