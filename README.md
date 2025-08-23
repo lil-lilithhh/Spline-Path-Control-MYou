@@ -11,7 +11,7 @@ Spline Path Control MYou is a simple tool inspired by Material You. It's designe
 
 ### Update v2.6:
 * Changed the logic of "Start Frame" and "Total Frames" to just "Start Frame" and "End Frame". Makes it so much easier to change the duration of a spline.
-* Added new keybinds: I & O. Pressing `I` will set the start frame for the selected spline(s) to the current frame in the timeline. Pressing `O` will set the start frame for the selected spline(s) to the current frame in the timeline (similar concept to "in-and-out points" found in video editors).  
+* Added new keybinds: I & O. Pressing `I` will set the start frame for the selected spline(s) to the current frame in the timeline. Pressing `O` will set the end frame for the selected spline(s) to the current frame in the timeline (similar concept to "in-and-out points" found in video editors).  
 
 ### Update v2.5:
 
