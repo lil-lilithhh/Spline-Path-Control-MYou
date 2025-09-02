@@ -20,25 +20,37 @@
             <div class="collapsible-content">
                 <div class="control-group">
                     <label for="selectedStartFrame">Start Frame:</label>
-                    <input type="number" id="selectedStartFrame" min="0" max="99999" step="1" value="0">
+                    <input type="number" id="selectedStartFrame" min="0" max="99999" step="1" value="0" title="Change what frame the spline or anchor's animation begins.">
                 </div>
                 <div class="control-group">
                     <label for="selectedEndFrame">End Frame:</label>
-                    <input type="number" id="selectedEndFrame" min="1" max="99999" step="1" value="80">
+                    <input type="number" id="selectedEndFrame" min="1" max="99999" step="1" value="80" title="Change what frame the spline or anchor's animation ends."> 
                 </div>
                 <div class="control-group">
                   <label for="selectedTension">Tension:</label>
-                  <input type="number" id="selectedTension" min="0" max="1" step="0.1" value="0">
+                  <input type="number" id="selectedTension" min="0" max="1" step="0.1" value="0" title="Change the curviness of the spline's path.">
                 </div>
-                <div class="control-group">
+                <div class="control-group checkbox-group">
+                    <label for="selectedLoop">Loop</label>
+                    <input type="checkbox" id="selectedLoop" title="Loop the spline/anchor til infinity. Decreasing or increasing the start or end frame changes how fast each loop is."> 
+                </div>
+                <div class="control-group checkbox-group">
+                    <label for="selectedHoldOnStart">Hold Start Frame</label>
+                    <input type="checkbox" id="selectedHoldOnStart" title="Hold the spline/anchor's starting position until the frame counter reaches the start frame ."> 
+                </div>
+                <div class="control-group checkbox-group">
                     <label for="selectedHideOnComplete">Hide When Done</label>
-                    <input type="checkbox" id="selectedHideOnComplete">
+                    <input type="checkbox" id="selectedHideOnComplete" title="Hide the spline/anchor at the end of it's duration.">
+                </div>
+                <div class="control-group checkbox-group">
+                    <label for="selectedScaleWithFPS">Scale with FPS</label>
+                    <input type="checkbox" id="selectedScaleWithFPS" title="When checked, the start and end frames will scale when the FPS is changed.">
                 </div>
                 <div class="section-divider">Path Easing</div>
                 <div id="easing-curve-editor-container" class="curve-editor-container"></div>
                 <div class="control-group">
                     <label for="selectedEasingTension">Easing Tension</label>
-                    <input type="number" id="selectedEasingTension" class="control-input" value="0" step="0.05" min="0" max="1" title="Controls the curvature of the path easing.">
+                    <input type="number" id="selectedEasingTension" class="control-input" value="0" step="0.1" min="0" max="1" title="Controls the curvature of the path easing.">
                 </div>
                 <div class="control-group">
                     <button id="resetEasingCurveBtn">Reset</button>
@@ -57,9 +69,21 @@
                     <label for="anchorEndFrame">End Frame:</label>
                     <input type="number" id="anchorEndFrame" min="1" max="99999" step="1" value="80">
                 </div>
-                <div class="control-group">
+                <div class="control-group checkbox-group">
+                    <label for="anchorLoop">Loop</label>
+                    <input type="checkbox" id="anchorLoop">
+                </div>
+                <div class="control-group checkbox-group">
+                    <label for="anchorHoldOnStart">Hold Start Frame</label>
+                    <input type="checkbox" id="anchorHoldOnStart">
+                </div>
+                <div class="control-group checkbox-group">
                     <label for="anchorHideOnComplete">Hide When Done</label>
                     <input type="checkbox" id="anchorHideOnComplete" checked>
+                </div>
+                <div class="control-group checkbox-group">
+                    <label for="anchorScaleWithFPS">Scale with FPS</label>
+                    <input type="checkbox" id="anchorScaleWithFPS" title="When checked, the start and end frames will scale when the FPS is changed.">
                 </div>
             </div>
         </div>
@@ -193,9 +217,9 @@
         <input type="file" id="overlayImage" accept="image/*, .png" hidden>
         <input type="file" id="loadCanvas" accept=".png" hidden>
       </div>
-        
         <div class="export-container">
           <div class="export-left-panel">
+          <span id="durationLabel" class="duration-label"></span>
           </div>
         </div>
       </div>
