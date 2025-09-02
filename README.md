@@ -1,4 +1,4 @@
-# Spline Path Control MYou v2.7
+# Spline Path Control MYou v2.8
 
 <img width="1852" height="994" alt="user-interface-skateboard" src="https://github.com/user-attachments/assets/a5feec81-c61e-461a-aa4c-57199eef187d" />
 
@@ -6,9 +6,16 @@
 
 Spline Path Control MYou is a simple tool inspired by Material You. It's designed to make it easy to create motion controls, which allows you to create and animate shapes that follow splines, and then export the result as a `.webm` video file. Input the motion paths into VACE to control the motion of anything (camera movement, objects, humans etc) all without extra prompting.
 
+### Update v2.8
+* Added the ability to loop a spline's entire motion across the duration of an animation! This will make certain actions such as walk cycles, a character waving their hand, or even a ball bouncing in a rhythmic motion much more viable and easier to do with just splines alone.
+* Added the ability to "hold" the start frame of a spline. This is similar to how we can "hold" the end frame of a spline, where the spline's motion path doesn't disappear at the end of its duration.
+* Added the ability for a spline's start/end frame (duration) to "scale" based on the fps of the animation. Increasing or decreasing the fps with 'Scale with FPS' checked on will adjust the start/end frame of the spline to keep the same overall duration of the spline's animation. Useful if you want to experiment with different framerates while keeping the same duration of your splines.
+* Added a new animation duration label below the canvas. This small label will tell you the amount of time in seconds the overall animation is. It will automatically update as you change the playback framerate or the amount of frames, which make it super handy to tell how long the animation is. You no longer have to calculate these yourself manually! :)
+* Added more tooltips to help the overall UX.
+
+
 ### Update v2.7:
 * Removed the `Length (in frames)` input at the top and replaced its functionality with an input that sits left to the timeline scrubber. Now there's no duplication of the length of the animation; just adjust the length in one spot, much more intuitive!
-
 
 ### Update v2.6:
 * Changed the logic of "Start Frame" and "Total Frames" to just "Start Frame" and "End Frame". Makes it so much easier to change the duration of a spline.
