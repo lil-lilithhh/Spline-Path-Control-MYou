@@ -939,6 +939,14 @@ body.dark-mode .collapsible-header:hover { background-color: var(--bg-surface); 
   border-radius: 50%;
 }
 
+.checkbox-group {
+  display: flex;
+  align-items: center;
+}
+
+.control-group label[for="selectedLoop"] { min-width: initial; flex-grow: 1; }
+.control-group label[for="selectedHoldOnStart"] { min-width: initial; flex-grow: 1; }
+
 #playPauseBtn {
     background-color: var(--accent-green);
     color: #fff;
@@ -992,4 +1000,10 @@ body.dark-mode .collapsible-header:hover { background-color: var(--bg-surface); 
 #blendSlider::-moz-range-thumb {
   background: #fab981;
   border: 4px solid #fab981;
+}
+
+.duration-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-right: 10px;
 }
