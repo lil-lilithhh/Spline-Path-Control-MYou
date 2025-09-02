@@ -19,6 +19,7 @@ let isExporting = false;
 let exportProgress = 0;
 let exportTotalFrames = 0;
 let exportFPS = 0;
+let previousFPS = 16;
 let exportDuration = 0;
 let exportCanvas;
 let mediaRecorder;
@@ -207,9 +208,9 @@ function setupEventListeners() {
   // NEW: Consolidated event listeners for multi-edit
   const allControls = [
       // Spline Settings
-      'selectedStartFrame', 'selectedEndFrame', 'selectedTension', 'selectedEasingTension', 'selectedHideOnComplete',
+      'selectedStartFrame', 'selectedEndFrame', 'selectedTension', 'selectedEasingTension', 'selectedHideOnComplete', 'selectedHoldOnStart', 'selectedLoop', 'selectedScaleWithFPS',
       // Anchor Settings
-      'anchorStartFrame', 'anchorEndFrame', 'anchorHideOnComplete', 'anchorScaleTension',
+      'anchorStartFrame', 'anchorEndFrame', 'anchorHideOnComplete', 'anchorHoldOnStart', 'anchorLoop', 'anchorScaleTension', 'anchorScaleWithFPS',
       // Shape Settings
       'selectedType', 'selectedFillColor', 'selectedStrokeColor', 'selectedStrokeWeight',
       'selectedSizeX', 'selectedSizeY'
@@ -223,13 +224,35 @@ function setupEventListeners() {
       }
   });
 
-  document.getElementById('exportFPS').addEventListener('change', recordState);
+  document.getElementById('exportFPS').addEventListener('change', (e) => {
+    const newFPS = parseInt(e.target.value);
+    if (isNaN(newFPS) || newFPS <= 0) return;
+    const scaleFactor = newFPS / previousFPS;
+    for (const spline of splines) {
+        if (spline.scaleWithFPS) {
+            spline.startFrame = Math.round(spline.startFrame * scaleFactor);
+            spline.totalFrames = Math.round(spline.totalFrames * scaleFactor);
+        }
+    }
+    for (const shape of staticShapes) {
+        if (shape.scaleWithFPS) {
+            shape.startFrame = Math.round(shape.startFrame * scaleFactor);
+            shape.totalFrames = Math.round(shape.totalFrames * scaleFactor);
+        }
+    }
+    previousFPS = newFPS;
+    updateSelectedItemUI();
+    updateDurationLabel();
+    recordState();
+  });
+
   totalFramesInput.addEventListener('blur', () => {
       let value = parseInt(totalFramesInput.textContent, 10);
       if (isNaN(value) || value < 1) {
           value = 80; // Reset to default if invalid
       }
       totalFramesInput.textContent = value;
+      updateDurationLabel();
       recordState();
   });
 
@@ -277,6 +300,17 @@ function setupEventListeners() {
     if (event.target == canvasSizeModal) {
       canvasSizeModal.style.display = 'none';
     }
+  }
+  updateDurationLabel();
+}
+
+function updateDurationLabel() {
+  const exportFpsValue = parseInt(document.getElementById('exportFPS').value) || 16;
+  const exportTotalFramesValue = parseInt(totalFramesInput.textContent) || 80;
+  const durationInSeconds = exportTotalFramesValue / exportFpsValue;
+  const durationLabel = document.getElementById('durationLabel');
+  if (durationLabel) {
+      durationLabel.textContent = `${durationInSeconds.toFixed(1)} seconds`;
   }
 }
 // =========
@@ -355,6 +389,7 @@ function captureState() {
         splines: serializableSplines,
         staticShapes: serializableStaticShapes,
         exportFPS: parseInt(document.getElementById('exportFPS').value),
+        previousFPS: previousFPS,
         exportTotalFrames: parseInt(totalFramesInput.textContent),
         splineColorIndex: splineColorIndex,
     };
@@ -377,6 +412,7 @@ function applyState(state) {
     });
 
     document.getElementById('exportFPS').value = state.exportFPS;
+    previousFPS = state.previousFPS;
     totalFramesInput.textContent = state.exportTotalFrames;
     splineColorIndex = state.splineColorIndex;
 
@@ -391,6 +427,7 @@ function applyState(state) {
     } else {
         updateSelectedItemUI();
     }
+    updateDurationLabel();
 }
 
 function recordState() {
@@ -463,9 +500,15 @@ function handleSettingChange(event) {
         'selectedTension': { name: 'tension', type: 'float' },
         'selectedEasingTension': { name: 'easingTension', type: 'float' },
         'selectedHideOnComplete': { name: 'hideOnComplete', type: 'bool' },
+        'selectedHoldOnStart': { name: 'holdOnStart', type: 'bool' },
+        'selectedLoop': { name: 'loop', type: 'bool' },
+        'selectedScaleWithFPS': { name: 'scaleWithFPS', type: 'bool' },
         'anchorStartFrame': { name: 'startFrame', type: 'int' },
         'anchorEndFrame': { name: 'endFrame', type: 'int' },
         'anchorHideOnComplete': { name: 'hideOnComplete', type: 'bool' },
+        'anchorHoldOnStart': { name: 'holdOnStart', type: 'bool' },
+        'anchorLoop': { name: 'loop', type: 'bool' },
+        'anchorScaleWithFPS': { name: 'scaleWithFPS', type: 'bool' },
         'anchorScaleTension': { name: 'scaleTension', type: 'float' },
         'selectedType': { name: 'shapeType', type: 'string' },
         'selectedFillColor': { name: 'fillColor', type: 'string' },
@@ -595,12 +638,18 @@ function updateSelectedItemUI() {
             document.getElementById('selectedStartFrame').value = firstSplineOwner.startFrame;
             document.getElementById('selectedEndFrame').value = firstSplineOwner.startFrame + firstSplineOwner.totalFrames;
             document.getElementById('selectedHideOnComplete').checked = firstSplineOwner.hideOnComplete;
+            document.getElementById('selectedHoldOnStart').checked = firstSplineOwner.holdOnStart;
+            document.getElementById('selectedLoop').checked = firstSplineOwner.loop;
+            document.getElementById('selectedScaleWithFPS').checked = firstSplineOwner.scaleWithFPS;
             document.getElementById('selectedTension').value = firstSplineOwner.tension;
             document.getElementById('selectedEasingTension').value = firstSplineOwner.easingTension || 0;
         } else if (anchorSection.style.display === 'block') {
             document.getElementById('anchorStartFrame').value = firstOwner.startFrame;
             document.getElementById('anchorEndFrame').value = firstOwner.startFrame + firstOwner.totalFrames;
             document.getElementById('anchorHideOnComplete').checked = firstOwner.hideOnComplete;
+            document.getElementById('anchorHoldOnStart').checked = firstOwner.holdOnStart;
+            document.getElementById('anchorLoop').checked = firstOwner.loop;
+            document.getElementById('anchorScaleWithFPS').checked = firstOwner.scaleWithFPS;
             document.getElementById('anchorScaleTension').value = firstOwner.scaleTension || 0;
         }
 
@@ -702,7 +751,10 @@ function addNewSpline() {
     strokeWeight: 0.5, 
     tension: 0,
     easingTension: 0,
-    hideOnComplete: true, 
+    hideOnComplete: true,
+    holdOnStart: false,
+    loop: false,
+    scaleWithFPS: false,
     scaleCurve: [{x: 0, y: 0}, {x: 1, y: 0}], // Default scale is 1x (factor of 0)
     easingCurve: [{x: 0, y: 0}, {x: 1, y: 1}] // Default easing is linear
   };
@@ -729,8 +781,11 @@ function addStaticShape() {
     strokeWeight: 0.5,
     startFrame: 0, 
     totalFrames: exportFrames, 
-    hideOnComplete: true, 
+    hideOnComplete: true,
+    holdOnStart: false,
+    loop: false,
     isStatic: true,
+    scaleWithFPS: false,
     scaleTension: 0,
     scaleCurve: [{x: 0, y: 0}, {x: 1, y: 0}]
   };
@@ -1821,15 +1876,20 @@ function getObjectPlaybackState(obj) {
   const durationMs = (obj.totalFrames / exportFps) * 1000 || 1;
   const endMs = startMs + durationMs;
 
-  if (currentTimeMs >= startMs && currentTimeMs < endMs) {
+  if (obj.loop) {
     isVisible = true;
-    rawProgress = (currentTimeMs - startMs) / durationMs;
-  } else if (currentTimeMs >= endMs) {
-    rawProgress = 1;
-    isVisible = !obj.hideOnComplete;
+    rawProgress = ((currentTimeMs - startMs) % durationMs) / durationMs;
   } else {
-    rawProgress = 0;
-    isVisible = false;
+    if (currentTimeMs >= startMs && currentTimeMs < endMs) {
+      isVisible = true;
+      rawProgress = (currentTimeMs - startMs) / durationMs;
+    } else if (currentTimeMs >= endMs) {
+      rawProgress = 1;
+      isVisible = !obj.hideOnComplete;
+    } else { // currentTimeMs < startMs
+      rawProgress = 0;
+      isVisible = obj.holdOnStart;
+    }
   }
   
   const easedProgress = applyEasing(rawProgress, obj);
@@ -2191,10 +2251,16 @@ function drawExportFrame(overallProgress) {
   // Draw Static Shapes (Anchors)
   for (const shape of staticShapes) {
     const endFrame = shape.startFrame + shape.totalFrames;
-    const isVisible = exportCurrentFrame >= shape.startFrame && (exportCurrentFrame < endFrame || !shape.hideOnComplete);
-    
+    let isVisible = (exportCurrentFrame >= endFrame && !shape.hideOnComplete) ||
+                    (exportCurrentFrame < shape.startFrame && shape.holdOnStart) ||
+                    (exportCurrentFrame >= shape.startFrame && exportCurrentFrame < endFrame) ||
+                    shape.loop;
+
     if (isVisible) {
-      const shapeProgress = constrain((exportCurrentFrame - shape.startFrame) / shape.totalFrames, 0, 1);
+      let shapeProgress = constrain((exportCurrentFrame - shape.startFrame) / shape.totalFrames, 0, 1);
+      if (shape.loop) {
+        shapeProgress = ((exportCurrentFrame - shape.startFrame) % shape.totalFrames) / shape.totalFrames;
+      }
       const scaleMultiplier = animCurveEditor.getScaleAtTime(shape, shapeProgress);
 
       const scaleX = exportCanvas.width / width;
@@ -2212,8 +2278,16 @@ function drawExportFrame(overallProgress) {
   // Draw Moving Shapes (from Splines)
   for (const spline of splines) {
     const endFrame = spline.startFrame + spline.totalFrames;
-    if (exportCurrentFrame >= spline.startFrame && (exportCurrentFrame < endFrame || !spline.hideOnComplete)) {
-      const splineProgress = constrain((exportCurrentFrame - spline.startFrame) / spline.totalFrames, 0, 1);
+    let isVisible = (exportCurrentFrame >= endFrame && !spline.hideOnComplete) ||
+                    (exportCurrentFrame < spline.startFrame && spline.holdOnStart) ||
+                    (exportCurrentFrame >= spline.startFrame && exportCurrentFrame < endFrame) ||
+                    spline.loop;
+
+    if (isVisible) {
+      let splineProgress = constrain((exportCurrentFrame - spline.startFrame) / spline.totalFrames, 0, 1);
+      if (spline.loop) {
+        splineProgress = ((exportCurrentFrame - spline.startFrame) % spline.totalFrames) / spline.totalFrames;
+      }
       const easedProgress = applyEasing(splineProgress, spline);
       const scaleMultiplier = animCurveEditor.getScaleAtTime(spline, splineProgress);
 
