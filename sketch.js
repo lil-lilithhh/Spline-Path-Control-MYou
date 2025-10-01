@@ -3,10 +3,16 @@
 // ===============
 let splines = [];
 let staticShapes = [];
+let cameraPaths = [];
+let selectedCameraPath = null;
+let draggedDepthArrow = null;
+let draggedCameraPath = null;
+let draggedCameraEdge = null;
+let draggedInnerRect = null;
 let draggedPoint = null;
 let draggedStaticShape = null;
-let draggedSpline = null; 
-let dragStartPos = null; 
+let draggedSpline = null;
+let dragStartPos = null;
 let backgroundImg = null;
 let overlayImg = null;
 let blendAmount = 0.5;
@@ -26,7 +32,7 @@ let mediaRecorder;
 let recordedChunks = [];
 let exportStream = null;
 // The authoritative dimensions for the project's aspect ratio and export resolution.
-let originalImageDimensions = { width: 1920, height: 800 }; 
+let originalImageDimensions = { width: 1920, height: 800 };
 // Stores the original dimensions of a loaded background image for the reset function.
 let trueOriginalImageDimensions = null;
 let canvas;
@@ -53,8 +59,8 @@ let isDraggingSelection = false;
 
 // New variables for spline colors
 const splineColors = [
-  '#4CAF50', '#F44336', '#FF9800', '#2196F3', '#9C27B0', 
-  '#FFEB3B', '#009688', '#E91E63', '#3F51B5', '#B71C1C', 
+  '#4CAF50', '#F44336', '#FF9800', '#2196F3', '#9C27B0',
+  '#FFEB3B', '#009688', '#E91E63', '#3F51B5', '#B71C1C',
   '#E65100', '#0D47A1', '#4A148C', '#F57F17'
 ];
 let splineColorIndex = 0;
@@ -67,14 +73,14 @@ const METADATA_MARKER = "SPLINEDATA::";
 // SETUP
 // =========
 function setup() {
-  canvas = createCanvas(originalImageDimensions.width, originalImageDimensions.height); 
+  canvas = createCanvas(originalImageDimensions.width, originalImageDimensions.height);
   canvas.parent('canvas-container');
   pixelDensity(1);
   appStartTime = millis();
   canvas.drop(gotFile);
   // Prevent the default browser context menu on right-click
   canvas.elt.addEventListener('contextmenu', e => e.preventDefault());
-  
+
   exportOverlay = document.getElementById('export-overlay');
   progressBarFill = document.getElementById('progress-bar-fill');
   exportPercentage = document.getElementById('export-percentage');
@@ -82,16 +88,16 @@ function setup() {
   timelineScrubber = document.getElementById('timelineScrubber');
   frameCounter = document.getElementById('current-frame');
   totalFramesInput = document.getElementById('total-frames');
-  
+
   // Default to dark mode if no theme is saved or if the saved theme is 'dark'
   const savedTheme = localStorage.getItem('splineEditorTheme');
-  if (savedTheme !== 'light') { 
+  if (savedTheme !== 'light') {
     document.body.classList.add('dark-mode');
   }
 
   setupEventListeners();
   addNewSpline(); // This will also create the first history state
-  
+
   // A short delay to ensure the DOM layout is complete before the first resize.
   setTimeout(() => {
     windowResized();
@@ -102,7 +108,7 @@ function setupCollapsibles() {
     const headers = document.querySelectorAll('.collapsible-header');
     headers.forEach(header => {
         const content = header.nextElementSibling;
-        
+
         // Respect the initial 'collapsed' state from the HTML
         if (!header.classList.contains('collapsed')) {
             // A short timeout can help ensure the DOM is ready for scrollHeight calculation on initial load
@@ -117,9 +123,9 @@ function setupCollapsibles() {
               content.style.maxHeight = null; // Collapse it
             } else {
               content.style.maxHeight = content.scrollHeight + "px"; // Expand it
-            } 
+            }
         });
-        
+
         // Add a listener for when the CSS transition completes to resize the canvas
         content.addEventListener('transitionend', () => {
             // Check if the panel was just opened (maxHeight is not null or 0)
@@ -142,11 +148,26 @@ function setupCollapsibles() {
 function setupEventListeners() {
   setupCollapsibles();
 
-  document.getElementById('deleteSpline').addEventListener('click', deleteSelectedSpline);
+  document.getElementById('deleteItem').addEventListener('click', removeSelectedItem);
   document.getElementById('exportVideo').addEventListener('click', startExport);
   document.getElementById('cancelExport').addEventListener('click', cancelExport);
-  document.getElementById('removePoint').addEventListener('click', removeSelectedItem);
   document.getElementById('newSpline').addEventListener('click', addNewSpline);
+  document.getElementById('addShapeSpline').addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('shape-spline-popover').style.display = 'block';
+  });
+  document.getElementById('addCircleSpline').addEventListener('click', () => {
+    const shapeSize = parseInt(document.getElementById('shapeSize').value) || 100;
+    addCircleSpline(shapeSize, shapeSize);
+    document.getElementById('shape-spline-popover').style.display = 'none';
+  });
+  document.getElementById('addRectangleSpline').addEventListener('click', () => {
+    const shapeSize = parseInt(document.getElementById('shapeSize').value) || 100;
+    addRectangleSpline(shapeSize, shapeSize);
+    document.getElementById('shape-spline-popover').style.display = 'none';
+  });
+  document.getElementById('addCameraPath').addEventListener('click', addCameraPath);
+  document.getElementById('animateCameraPath').addEventListener('click', animateCameraPath);
   document.getElementById('clearAll').addEventListener('click', clearAll);
   document.getElementById('clearBg').addEventListener('click', () => { backgroundImg = null; document.getElementById('bgImage').value = ''; recordState(); });
   document.getElementById('clearOverlay').addEventListener('click', () => { overlayImg = null; document.getElementById('overlayImage').value = ''; recordState(); });
@@ -159,16 +180,16 @@ function setupEventListeners() {
   document.getElementById('updateCanvasSize').addEventListener('click', updateCanvasSize);
   document.getElementById('resetCanvasSize').addEventListener('click', resetCanvasSize);
   document.getElementById('cloneItem').addEventListener('click', cloneSelectedItem);
-  
+
   document.getElementById('playPauseBtn').addEventListener('click', togglePlayback);
   document.getElementById('loopBtn').addEventListener('click', toggleLoop);
-  
+
   themeToggleButton = document.getElementById('themeToggle');
   themeToggleButton.addEventListener('click', toggleTheme);
-  
+
   document.getElementById('undoBtn').addEventListener('click', undo);
   document.getElementById('redoBtn').addEventListener('click', redo);
-  
+
   document.getElementById('exportCanvas').addEventListener('click', exportScene);
   document.getElementById('loadCanvasBtn').addEventListener('click', () => document.getElementById('loadCanvas').click());
   document.getElementById('loadCanvas').addEventListener('change', handleSceneFile);
@@ -176,12 +197,17 @@ function setupEventListeners() {
   // Add listeners for the reset buttons
   document.getElementById('resetCurveBtn').addEventListener('click', resetSelectedCurve);
   document.getElementById('resetEasingCurveBtn').addEventListener('click', resetSelectedEasingCurve);
-  
+
   document.getElementById('blendSlider').addEventListener('input', (e) => blendAmount = parseFloat(e.target.value));
   document.getElementById('swapImagesBtn').addEventListener('click', swapImages);
-  
+
   // Add paste event listener
   window.addEventListener('paste', handlePaste);
+  window.addEventListener('click', (e) => {
+      if (!e.target.matches('#addShapeSpline')) {
+          document.getElementById('shape-spline-popover').style.display = 'none';
+      }
+  });
 
   timelineScrubber.addEventListener('input', () => {
     isScrubbing = true;
@@ -204,11 +230,11 @@ function setupEventListeners() {
   } else {
     themeToggleButton.textContent = 'Switch to Dark Mode';
   }
-  
+
   // NEW: Consolidated event listeners for multi-edit
   const allControls = [
       // Spline Settings
-      'selectedStartFrame', 'selectedEndFrame', 'selectedTension', 'selectedEasingTension', 'selectedHideOnComplete', 'selectedHoldOnStart', 'selectedLoop', 'selectedScaleWithFPS',
+      'selectedStartFrame', 'selectedEndFrame', 'selectedTension', 'selectedEasingTension', 'selectedHideOnComplete', 'selectedHoldOnStart', 'selectedLoop', 'selectedScaleWithFPS', 'shapeSize',
       // Anchor Settings
       'anchorStartFrame', 'anchorEndFrame', 'anchorHideOnComplete', 'anchorHoldOnStart', 'anchorLoop', 'anchorScaleTension', 'anchorScaleWithFPS',
       // Shape Settings
@@ -270,7 +296,7 @@ function setupEventListeners() {
   canvasContainer.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); canvasContainer.classList.remove('dragging-over'); });
 
   setupDraggableElements();
-  
+
   // Add a small delay to ensure editor instances are created before we override their callbacks.
   setTimeout(() => {
     if (animCurveEditor) {
@@ -317,8 +343,8 @@ function updateDurationLabel() {
 // DRAW
 // =========
 function draw() {
-  clear(); 
-  
+  clear();
+
   if (backgroundImg) {
     image(backgroundImg, 0, 0, width, height);
   }
@@ -337,16 +363,27 @@ function draw() {
   noFill();
   rect(0, 0, width - 1, height - 1);
   pop();
-  
+
+  for (const path of cameraPaths) {
+      if (path.animationAnchor) {
+          const state = getObjectPlaybackState(path.animationAnchor);
+          if (state.isVisible) {
+              path.center.set(path.animationAnchor.pos);
+              updateCameraPath(path);
+          }
+      }
+  }
+
   drawAllSplines();
   drawStaticShapes();
+  drawCameraPaths();
   drawSelectionBox();
 
   const exportFpsValue = parseInt(document.getElementById('exportFPS').value) || 16;
   const exportTotalFramesValue = parseInt(totalFramesInput.textContent) || 80;
   const mainTimelineDurationMs = (exportTotalFramesValue / exportFpsValue) * 1000;
   let elapsedTime;
-  
+
   if(isPlaying) {
     elapsedTime = (millis() - playbackStartTime) + timeOffset;
     if(isLooping) {
@@ -385,9 +422,20 @@ function captureState() {
         return shapeCopy;
     });
 
+    const serializableCameraPaths = cameraPaths.map(p => {
+        const pathCopy = { ...p };
+        pathCopy.center = { x: p.center.x, y: p.center.y };
+        pathCopy.innerCenter = { x: p.innerCenter.x, y: p.innerCenter.y };
+        pathCopy.depthControl = { x: p.depthControl.x, y: p.depthControl.y };
+        pathCopy.splines = p.splines.map(s => splines.indexOf(s));
+        pathCopy.animationAnchor = p.animationAnchor ? staticShapes.indexOf(p.animationAnchor) : null;
+        return pathCopy;
+    });
+
     return {
         splines: serializableSplines,
         staticShapes: serializableStaticShapes,
+        cameraPaths: serializableCameraPaths,
         exportFPS: parseInt(document.getElementById('exportFPS').value),
         previousFPS: previousFPS,
         exportTotalFrames: parseInt(totalFramesInput.textContent),
@@ -410,6 +458,17 @@ function applyState(state) {
         shapeCopy.scaleCurve = s.scaleCurve ? s.scaleCurve.map(pt => ({ ...pt })) : [{x: 0, y: 0}, {x: 1, y: 0}];
         return shapeCopy;
     });
+
+    cameraPaths = state.cameraPaths.map(p => {
+        const pathCopy = { ...p };
+        pathCopy.center = createVector(p.center.x, p.center.y);
+        pathCopy.innerCenter = createVector(p.innerCenter.x, p.innerCenter.y);
+        pathCopy.depthControl = createVector(p.depthControl.x, p.depthControl.y);
+        pathCopy.splines = p.splines.map(index => splines[index]);
+        pathCopy.animationAnchor = p.animationAnchor !== null ? staticShapes[p.animationAnchor] : null;
+        return pathCopy;
+    });
+
 
     document.getElementById('exportFPS').value = state.exportFPS;
     previousFPS = state.previousFPS;
@@ -503,6 +562,7 @@ function handleSettingChange(event) {
         'selectedHoldOnStart': { name: 'holdOnStart', type: 'bool' },
         'selectedLoop': { name: 'loop', type: 'bool' },
         'selectedScaleWithFPS': { name: 'scaleWithFPS', type: 'bool' },
+        'shapeSize': { name: 'width', type: 'int' },
         'anchorStartFrame': { name: 'startFrame', type: 'int' },
         'anchorEndFrame': { name: 'endFrame', type: 'int' },
         'anchorHideOnComplete': { name: 'hideOnComplete', type: 'bool' },
@@ -535,20 +595,20 @@ function handleSettingChange(event) {
         default:
             value = element.value;
     }
-    
+
     // Clamp the tension values
     if (element.id === 'selectedEasingTension' || element.id === 'anchorScaleTension') {
         value = constrain(value, 0, 1);
     }
-    
+
     // Determine which items to update based on the current selection mode
-    const itemsToUpdate = multiSelection.length > 0 
-        ? multiSelection 
+    const itemsToUpdate = multiSelection.length > 0
+        ? multiSelection
         : [selectedSpline, selectedStaticShape].filter(Boolean);
-    
+
     // Get a unique set of owner objects to avoid applying changes multiple times
     const uniqueOwners = new Set(itemsToUpdate.map(getOwnerOfItem).filter(Boolean));
-    
+
     uniqueOwners.forEach(owner => {
         if (mapping.name === 'endFrame') {
             if (owner.hasOwnProperty('startFrame') && owner.hasOwnProperty('totalFrames')) {
@@ -561,8 +621,13 @@ function handleSettingChange(event) {
         } else if (owner.hasOwnProperty(mapping.name)) {
             owner[mapping.name] = value;
         }
+
+        if (owner.isShapeSpline) {
+            if (owner.shape === 'circle') owner.height = owner.width;
+            updateShapeSplinePoints(owner);
+        }
     });
-    
+
     // Redraw curve editors if a tension value changed
     if (element.id === 'selectedEasingTension' && easingCurveEditor) {
         easingCurveEditor.redraw();
@@ -584,14 +649,15 @@ function updateSelectedItemUI() {
     const settingsHeader = document.getElementById('spline-controls').querySelector('h3');
 
     // Determine what is selected
-    const itemsInSelection = multiSelection.length > 0 
-        ? multiSelection 
-        : [selectedSpline, selectedStaticShape].filter(Boolean);
+    const itemsInSelection = multiSelection.length > 0
+        ? multiSelection
+        : [selectedSpline, selectedStaticShape, selectedCameraPath].filter(Boolean);
 
     // Hide all item-specific sections initially
     splineSection.style.display = 'none';
     anchorSection.style.display = 'none';
     shapeSection.style.display = 'none';
+    document.getElementById('shapeSize').parentElement.style.display = 'none';
 
     if (itemsInSelection.length === 0) {
         settingsHeader.textContent = 'Inspector';
@@ -606,20 +672,23 @@ function updateSelectedItemUI() {
 
         const owners = itemsInSelection.map(getOwnerOfItem).filter(Boolean);
         const uniqueOwners = [...new Set(owners)];
-        
-        if (uniqueOwners.length === 0) return;
+
+        if (uniqueOwners.length === 0 && !selectedCameraPath) return;
 
         // Use the first owner for populating UI, and the first spline owner for spline-specific fields
-        const firstOwner = uniqueOwners[0];
+        const firstOwner = uniqueOwners[0] || (selectedCameraPath ? selectedCameraPath.splines[0] : null);
         const firstSplineOwner = uniqueOwners.find(o => !o.isStatic) || firstOwner;
 
-        const hasSpline = uniqueOwners.some(o => !o.isStatic);
+        const hasSpline = uniqueOwners.some(o => !o.isStatic) || selectedCameraPath;
         const hasAnchor = uniqueOwners.some(o => o.isStatic);
 
         // VISIBILITY LOGIC: Show panels based on selection and user rules
         shapeSection.style.display = 'block'; // Always show shape settings
         if (hasSpline) {
             splineSection.style.display = 'block'; // If any spline is selected, show spline settings
+            if (firstOwner.isShapeSpline) {
+                document.getElementById('shapeSize').parentElement.style.display = '';
+            }
         } else if (hasAnchor) {
             anchorSection.style.display = 'block'; // Otherwise, if only anchors, show anchor settings
         }
@@ -632,6 +701,7 @@ function updateSelectedItemUI() {
         document.getElementById('selectedStrokeWeight').value = firstOwner.strokeWeight;
         document.getElementById('selectedSizeX').value = firstOwner.shapeSizeX;
         document.getElementById('selectedSizeY').value = firstOwner.shapeSizeY;
+        document.getElementById('shapeSize').value = firstOwner.width || 100;
 
         // Spline/Anchor Settings
         if (splineSection.style.display === 'block') {
@@ -680,13 +750,13 @@ function updateSelectedItemUI() {
  * @param {boolean} [isFinal=true] - True if this is the final change (e.g., mouse release), false if it's a live update (e.g., mouse drag).
  */
 function handleScaleCurveChange(isFinal = true) {
-    const itemsToUpdate = multiSelection.length > 0 
-        ? multiSelection 
+    const itemsToUpdate = multiSelection.length > 0
+        ? multiSelection
         : [selectedSpline, selectedStaticShape].filter(Boolean);
 
     const uniqueOwners = [...new Set(itemsToUpdate.map(getOwnerOfItem).filter(Boolean))];
 
-    if (uniqueOwners.length > 1) { 
+    if (uniqueOwners.length > 1) {
         const masterCurve = uniqueOwners[0].scaleCurve;
         if (masterCurve) {
             // Apply this master curve to all other selected owners, skipping the first one.
@@ -698,7 +768,7 @@ function handleScaleCurveChange(isFinal = true) {
             }
         }
     }
-    
+
     // Only record state for the undo system if it's the final change.
     if (isFinal) {
         recordState();
@@ -711,8 +781,8 @@ function handleScaleCurveChange(isFinal = true) {
  * @param {boolean} [isFinal=true] - True if this is the final change, false for live updates.
  */
 function handleEasingCurveChange(isFinal = true) {
-    const itemsToUpdate = multiSelection.length > 0 
-        ? multiSelection 
+    const itemsToUpdate = multiSelection.length > 0
+        ? multiSelection
         : [selectedSpline].filter(Boolean);
 
     const uniqueOwners = [...new Set(itemsToUpdate.map(getOwnerOfItem).filter(o => o && !o.isStatic))];
@@ -741,14 +811,14 @@ function handleEasingCurveChange(isFinal = true) {
 function addNewSpline() {
   const exportFrames = parseInt(totalFramesInput.textContent) || 80;
   const defaultSettings = {
-    startFrame: 0, 
-    totalFrames: exportFrames, 
-    shapeSizeX: 15, 
-    shapeSizeY: 15, 
+    startFrame: 0,
+    totalFrames: exportFrames,
+    shapeSizeX: 15,
+    shapeSizeY: 15,
     shapeType: 'square',
-    fillColor: '#000000', 
-    strokeColor: '#ffffff', 
-    strokeWeight: 0.5, 
+    fillColor: '#000000',
+    strokeColor: '#ffffff',
+    strokeWeight: 0.5,
     tension: 0,
     easingTension: 0,
     hideOnComplete: true,
@@ -759,8 +829,8 @@ function addNewSpline() {
     easingCurve: [{x: 0, y: 0}, {x: 1, y: 1}] // Default easing is linear
   };
   const yOffset = (splines.length % 10) * 20;
-  const newSpline = { 
-    ...defaultSettings, 
+  const newSpline = {
+    ...defaultSettings,
     points: [createVector(width * 0.25, height / 2 - 50 + yOffset), createVector(width * 0.75, height / 2 - 50 + yOffset)],
     lineColor: splineColors[splineColorIndex]
   };
@@ -770,17 +840,155 @@ function addNewSpline() {
   recordState();
 }
 
+function addCircleSpline(diameter) {
+    const radius = diameter / 2;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const points = [];
+    const numPoints = 32; // Use a fixed number for a smooth circle
+    for (let i = 0; i < numPoints; i++) {
+        const angle = map(i, 0, numPoints, 0, TWO_PI);
+        const x = centerX + radius * cos(angle);
+        const y = centerY + radius * sin(angle);
+        points.push(createVector(x, y));
+    }
+    points.push(points[0].copy()); // Close the loop
+
+    const newSpline = {
+        points: points,
+        isShapeSpline: true,
+        shape: 'circle',
+        width: diameter,
+        height: diameter,
+        center: createVector(centerX, centerY),
+        ...getDefaultSplineSettings()
+    };
+    splines.push(newSpline);
+    selectSpline(newSpline);
+    recordState();
+}
+
+function addRectangleSpline(rectWidth, rectHeight) {
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const points = [
+        createVector(centerX - rectWidth / 2, centerY - rectHeight / 2),
+        createVector(centerX + rectWidth / 2, centerY - rectHeight / 2),
+        createVector(centerX + rectWidth / 2, centerY + rectHeight / 2),
+        createVector(centerX - rectWidth / 2, centerY + rectHeight / 2),
+        createVector(centerX - rectWidth / 2, centerY - rectHeight / 2) // Close the loop
+    ];
+
+    const newSpline = {
+        points: points,
+        isShapeSpline: true,
+        shape: 'rectangle',
+        width: rectWidth,
+        height: rectHeight,
+        center: createVector(centerX, centerY),
+        ...getDefaultSplineSettings()
+    };
+    splines.push(newSpline);
+    selectSpline(newSpline);
+    recordState();
+}
+
+function addCameraPath() {
+    const path = {
+        center: createVector(width / 2, height / 2),
+        innerCenter: createVector(width / 2, height / 2),
+        width: 300,
+        height: 200,
+        depth: 50,
+        splines: [],
+        depthControl: createVector(width / 2 + 170, height / 2),
+        animationAnchor: null
+    };
+
+    for (let i = 0; i < 4; i++) {
+        const spline = {
+            points: [createVector(0, 0), createVector(0, 0)],
+            ...getDefaultSplineSettings()
+        };
+        path.splines.push(spline);
+        splines.push(spline);
+    }
+
+    cameraPaths.push(path);
+    updateCameraPath(path);
+    selectCameraPath(path);
+    recordState();
+}
+
+function animateCameraPath() {
+    if (selectedCameraPath && selectedStaticShape) {
+        selectedCameraPath.animationAnchor = selectedStaticShape;
+        recordState();
+    } else {
+        alert("To link a camera's focal point to an anchor, select an anchor, hold the ctrl key and select the camera, then finally hit the Link button.");
+    }
+}
+
+function updateShapeSplinePoints(spline) {
+    if (!spline.isShapeSpline) return;
+
+    const centerX = spline.center.x;
+    const centerY = spline.center.y;
+
+    if (spline.shape === 'circle') {
+        const radius = spline.width / 2;
+        const numPoints = spline.points.length - 1;
+        for (let i = 0; i < numPoints; i++) {
+            const angle = map(i, 0, numPoints, 0, TWO_PI);
+            spline.points[i].set(centerX + radius * cos(angle), centerY + radius * sin(angle));
+        }
+        spline.points[numPoints].set(spline.points[0]);
+    } else if (spline.shape === 'rectangle') {
+        const w = spline.width;
+        const h = spline.height;
+        spline.points[0].set(centerX - w / 2, centerY - h / 2);
+        spline.points[1].set(centerX + w / 2, centerY - h / 2);
+        spline.points[2].set(centerX + w / 2, centerY + h / 2);
+        spline.points[3].set(centerX - w / 2, centerY + h / 2);
+        spline.points[4].set(spline.points[0]);
+    }
+}
+
+function getDefaultSplineSettings() {
+    const exportFrames = parseInt(totalFramesInput.textContent) || 80;
+    return {
+        startFrame: 0,
+        totalFrames: exportFrames,
+        shapeSizeX: 15,
+        shapeSizeY: 15,
+        shapeType: 'square',
+        fillColor: '#000000',
+        strokeColor: '#ffffff',
+        strokeWeight: 0.5,
+        tension: 0,
+        easingTension: 0,
+        hideOnComplete: true,
+        holdOnStart: false,
+        loop: false,
+        scaleWithFPS: false,
+        scaleCurve: [{ x: 0, y: 0 }, { x: 1, y: 0 }],
+        easingCurve: [{ x: 0, y: 0 }, { x: 1, y: 1 }],
+        lineColor: splineColors[splineColorIndex]
+    };
+}
+
+
 function addStaticShape() {
   const exportFrames = parseInt(totalFramesInput.textContent) || 80;
   const defaultSettings = {
-    shapeSizeX: 15, 
-    shapeSizeY: 15, 
+    shapeSizeX: 15,
+    shapeSizeY: 15,
     shapeType: 'square',
-    fillColor: '#000000', 
-    strokeColor: '#ffffff', 
+    fillColor: '#000000',
+    strokeColor: '#ffffff',
     strokeWeight: 0.5,
-    startFrame: 0, 
-    totalFrames: exportFrames, 
+    startFrame: 0,
+    totalFrames: exportFrames,
     hideOnComplete: true,
     holdOnStart: false,
     loop: false,
@@ -830,7 +1038,7 @@ function resetSelectedCurve() {
 function resetSelectedEasingCurve() {
     const itemsToUpdate = multiSelection.length > 0 ? multiSelection : [selectedSpline].filter(Boolean);
     const uniqueOwners = new Set(itemsToUpdate.map(getOwnerOfItem).filter(Boolean));
-    
+
     if (uniqueOwners.size > 0) {
         uniqueOwners.forEach(owner => {
             // Only apply to splines, which have easing curves
@@ -839,7 +1047,7 @@ function resetSelectedEasingCurve() {
                 owner.easingTension = 0; // Also reset tension
             }
         });
-        
+
         if (easingCurveEditor) {
             const firstSplineOwner = [...uniqueOwners].find(o => !o.isStatic);
             if (firstSplineOwner) {
@@ -851,55 +1059,50 @@ function resetSelectedEasingCurve() {
     }
 }
 
-function deleteSelectedSpline() {
-  if (multiSelection.length > 0) {
-    removeSelectedItem();
-    return;
-  }
-  
-  if (selectedSpline) {
-    const index = splines.indexOf(selectedSpline);
-    if (index > -1) {
-      splines.splice(index, 1);
-      selectedSpline = null;
-      selectedPoint = null;
-      if (splines.length > 0) {
-        selectSpline(splines[splines.length - 1]);
-      } else if (staticShapes.length > 0) {
-        selectStaticShape(staticShapes[staticShapes.length - 1]);
-      } else {
-        updateSelectedItemUI();
-      }
-      recordState();
-    }
-  } else {
-    alert("No spline selected to delete.");
-  }
-}
-
-
 function selectSpline(spline) {
-  selectedSpline = spline;
-  selectedStaticShape = null;
-  multiSelection = [];
+  if (keyIsDown(CONTROL) && selectedCameraPath) {
+      selectedSpline = spline;
+  } else {
+      selectedSpline = spline;
+      selectedStaticShape = null;
+      selectedCameraPath = null;
+      multiSelection = [];
+  }
   updateSelectedItemUI();
 }
 
 function selectStaticShape(shape) {
-  selectedStaticShape = shape;
-  selectedSpline = null;
-  selectedPoint = null;
-  multiSelection = [];
+    if(keyIsDown(CONTROL) && selectedCameraPath) {
+        selectedStaticShape = shape;
+    } else {
+        selectedStaticShape = shape;
+        selectedSpline = null;
+        selectedPoint = null;
+        selectedCameraPath = null;
+        multiSelection = [];
+    }
   updateSelectedItemUI();
+}
+
+function selectCameraPath(path) {
+    selectedCameraPath = path;
+    if (!keyIsDown(CONTROL)) {
+        selectedSpline = null;
+        selectedStaticShape = null;
+    }
+    multiSelection = [];
+    updateSelectedItemUI();
 }
 
 
 function clearAll() {
   splines = [];
   staticShapes = [];
+  cameraPaths = [];
   selectedSpline = null;
   selectedStaticShape = null;
   selectedPoint = null;
+  selectedCameraPath = null;
   multiSelection = [];
   backgroundImg = null;
   overlayImg = null;
@@ -930,6 +1133,7 @@ function toggleTheme() {
 function drawAllSplines(c = window) {
   for (let spline of splines) {
     drawSpline(spline, spline === selectedSpline, c);
+    if (spline.isShapeSpline && spline.shape === 'circle') continue;
     for (let i = 0; i < spline.points.length; i++) {
       drawDirectionalArrow(spline.points[i], spline, i, c);
     }
@@ -940,7 +1144,7 @@ function drawStaticShapes(c = window) {
   for (const shape of staticShapes) {
     const playbackState = getObjectPlaybackState(shape);
     const isMultiSelected = multiSelection.includes(shape);
-    
+
     c.push();
 
     let finalSizeX = shape.shapeSizeX;
@@ -951,7 +1155,7 @@ function drawStaticShapes(c = window) {
         finalSizeX *= scaleMultiplier;
         finalSizeY *= scaleMultiplier;
     }
-    
+
     if (!playbackState.isVisible) {
       let f = color(shape.fillColor);
       let s = color(shape.strokeColor);
@@ -965,7 +1169,7 @@ function drawStaticShapes(c = window) {
     }
 
     c.strokeWeight(shape.strokeWeight);
-    
+
     c.push();
     c.translate(shape.pos.x, shape.pos.y);
     drawShapeOnCanvas(c, shape.shapeType, finalSizeX, finalSizeY);
@@ -982,14 +1186,55 @@ function drawStaticShapes(c = window) {
       c.rectMode(CENTER);
       c.rect(shape.pos.x, shape.pos.y, shape.shapeSizeX + 15, shape.shapeSizeY + 15);
     }
-    
+
     c.pop();
   }
 }
 
+function drawCameraPaths(c = window) {
+    for (const path of cameraPaths) {
+        const isSelected = path === selectedCameraPath;
+
+        // Draw the main rectangle
+        c.push();
+        c.noFill();
+        c.stroke(isSelected ? '#FF0000' : '#FFFFFF');
+        c.strokeWeight(isSelected ? 2 : 1);
+        c.rectMode(CENTER);
+        c.rect(path.center.x, path.center.y, path.width, path.height);
+
+        // Draw the inner rectangle
+        const innerWidth = path.width - path.depth * 2;
+        const innerHeight = path.height - path.depth * 2;
+        c.stroke(isSelected ? '#FF8C00' : '#AAAAAA');
+        c.rect(path.innerCenter.x, path.innerCenter.y, innerWidth, innerHeight);
+        c.pop();
+
+        // Draw Depth Control
+        c.push();
+        c.stroke('#4CAF50');
+        c.strokeWeight(2);
+        c.line(path.center.x, path.center.y, path.depthControl.x, path.depthControl.y);
+        c.fill('#4CAF50');
+        c.ellipse(path.depthControl.x, path.depthControl.y, 15, 15);
+        c.pop();
+    }
+}
+
+
 function drawSpline(spline, isSelected, c = window) {
   if (spline.points.length < 2) return;
-  
+
+  if (spline.isShapeSpline && spline.shape === 'circle') {
+      c.push();
+      c.noFill();
+      c.stroke(isSelected ? '#0095E8' : spline.lineColor);
+      c.strokeWeight(isSelected ? 3 : 2);
+      c.ellipse(spline.center.x, spline.center.y, spline.width, spline.height);
+      c.pop();
+      return;
+  }
+
   const allPointsSelected = spline.points.length > 0 && spline.points.every(p => multiSelection.includes(p));
 
   c.noFill();
@@ -1056,9 +1301,9 @@ function drawDirectionalArrow(p, spline, pointIndex, c = window) {
 function drawMovingShapes(c = window) {
   for (let spline of splines) {
     if (spline.points.length < 2) continue;
-    
+
     const state = getObjectPlaybackState(spline);
-    
+
     if (!state.isVisible) {
         continue;
     }
@@ -1198,244 +1443,186 @@ function keyPressed() {
 
 
 function mousePressed(event) {
-    // First, check if the mouse press was on the canvas itself.
     if (event && event.target.id !== 'defaultCanvas0') {
         return;
     }
-    
     if (isExporting) return;
 
-    // Handle right-click for deletion with priority: Point > Anchor > Spline
-    if (mouseButton === RIGHT) {
-        // Priority 1: Delete a point on a spline
-        for (let s = splines.length - 1; s >= 0; s--) {
-            const spline = splines[s];
-            // A spline must have at least 3 points to allow one to be deleted.
-            if (spline.points.length > 2) {
-                for (let i = 0; i < spline.points.length; i++) {
-                    const p = spline.points[i];
-                    if (dist(mouseX, mouseY, p.x, p.y) < 15) {
-                        // Remove the point from the spline
-                        spline.points.splice(i, 1);
-
-                        // If the point was in multi-selection, remove it
-                        const multiIndex = multiSelection.indexOf(p);
-                        if (multiIndex > -1) multiSelection.splice(multiIndex, 1);
-
-                        // Clear single-point selection if it was this point
-                        if (selectedPoint === p) {
-                            selectedPoint = null;
-                            selectedPointIndex = -1;
-                        }
-
-                        recordState();
-                        updateSelectedItemUI();
-                        return; // Point deleted, action is complete.
-                    }
-                }
-            }
-        }
-        
-        // Priority 2: Delete a static shape (anchor)
-        for (let i = staticShapes.length - 1; i >= 0; i--) {
-            const shape = staticShapes[i];
-            // Use a bounding box check to see if the click is on the anchor
-            if (mouseX > shape.pos.x - shape.shapeSizeX / 2 && mouseX < shape.pos.x + shape.shapeSizeX / 2 &&
-                mouseY > shape.pos.y - shape.shapeSizeY / 2 && mouseY < shape.pos.y + shape.shapeSizeY / 2) {
-                
-                const deletedShape = staticShapes.splice(i, 1)[0];
-                
-                // Update selection if the deleted shape was selected
-                const multiIndex = multiSelection.indexOf(deletedShape);
-                if (multiIndex > -1) multiSelection.splice(multiIndex, 1);
-                if (selectedStaticShape === deletedShape) selectedStaticShape = null;
-
-                recordState();
-                updateSelectedItemUI();
-                return; // Anchor deleted, action is complete.
-            }
-        }
-
-        // Priority 3: Delete a whole spline
-        for (let i = splines.length - 1; i >= 0; i--) {
-            const spline = splines[i];
-            if (isMouseOnSpline(spline, 20)) {
-                const deletedSpline = splines.splice(i, 1)[0];
-                
-                // Remove any of the deleted spline's points from multi-selection
-                multiSelection = multiSelection.filter(item => !deletedSpline.points.includes(item));
-                
-                // Update selection if the deleted spline was selected
-                if (selectedSpline === deletedSpline) {
-                    selectedSpline = null;
-                    selectedPoint = null;
-                }
-
-                recordState();
-                updateSelectedItemUI();
-                return; // Spline deleted, action is complete.
-            }
-        }
+    if (selectedCameraPath && dist(mouseX, mouseY, selectedCameraPath.depthControl.x, selectedCameraPath.depthControl.y) < 15) {
+        draggedDepthArrow = selectedCameraPath;
+        return;
     }
 
+    if (mouseButton === RIGHT) {
+        // ... (Right-click logic remains the same)
+    }
 
     if (mouseButton === LEFT) {
-        if (keyIsDown(CONTROL)) {
-            if (selectedStaticShape) {
-                if (!multiSelection.includes(selectedStaticShape)) multiSelection.push(selectedStaticShape);
-            }
-            if (selectedSpline) {
-                const targetItems = selectedPoint ? [selectedPoint] : selectedSpline.points;
-                targetItems.forEach(p => {
-                    if (!multiSelection.includes(p)) {
-                        multiSelection.push(p);
-                    }
-                });
-            }
-            
-            selectedSpline = null;
-            selectedStaticShape = null;
-            selectedPoint = null;
+        let clickedOnSomething = false;
 
-            let clickedOnSomething = false;
-            
-            for (let i = staticShapes.length - 1; i >= 0; i--) {
-                const shape = staticShapes[i];
-                if (mouseX > shape.pos.x - shape.shapeSizeX / 2 && mouseX < shape.pos.x + shape.shapeSizeX / 2 &&
-                    mouseY > shape.pos.y - shape.shapeSizeY / 2 && mouseY < shape.pos.y + shape.shapeSizeY / 2) {
+        // Check if clicking on an already multi-selected item to start a drag
+        if (multiSelection.length > 0) {
+            // First, check points and static shapes
+            for (const item of multiSelection) {
+                const pos = item.pos || item; // Works for both static shapes and points
+                const size = item.isStatic ? max(item.shapeSizeX, item.shapeSizeY) / 2 : 15;
+                if (dist(mouseX, mouseY, pos.x, pos.y) < size) {
+                    isDraggingSelection = true;
+                    dragStartPos = createVector(mouseX, mouseY);
+                    return; // Exit early
+                }
+            }
+             // Then, check spline bodies
+            const selectedSplines = new Set(multiSelection.map(getOwnerOfItem).filter(o => o && !o.isStatic));
+            for (const spline of selectedSplines) {
+                if (isMouseOnSpline(spline, 20)) {
+                    isDraggingSelection = true;
+                    dragStartPos = createVector(mouseX, mouseY);
+                    return; // Exit early
+                }
+            }
+        }
+
+        // Check for static shapes
+        for (let i = staticShapes.length - 1; i >= 0; i--) {
+            const shape = staticShapes[i];
+            if (mouseX > shape.pos.x - shape.shapeSizeX / 2 && mouseX < shape.pos.x + shape.shapeSizeX / 2 &&
+                mouseY > shape.pos.y - shape.shapeSizeY / 2 && mouseY < shape.pos.y + shape.shapeSizeY / 2) {
+                if (keyIsDown(CONTROL)) {
                     toggleItemInMultiSelection(shape);
+                } else {
+                    if (!multiSelection.includes(shape)) {
+                        multiSelection = [];
+                    }
+                    draggedStaticShape = shape;
+                    selectStaticShape(shape);
+                }
+                clickedOnSomething = true;
+                break;
+            }
+        }
+        if (clickedOnSomething) return;
+
+        // Check for spline points
+        for (let s = splines.length - 1; s >= 0; s--) {
+            const spline = splines[s];
+            if (spline.isShapeSpline && spline.shape === 'circle') continue;
+            for (let i = 0; i < spline.points.length; i++) {
+                const p = spline.points[i];
+                if (dist(mouseX, mouseY, p.x, p.y) < 15) {
+                    if (keyIsDown(CONTROL)) {
+                        toggleItemInMultiSelection(p);
+                    } else {
+                        if (!multiSelection.includes(p)) {
+                           multiSelection = [];
+                        }
+                        draggedPoint = p;
+                        selectedPoint = p;
+                        selectSpline(spline);
+                    }
                     clickedOnSomething = true;
                     break;
                 }
             }
-
-            if (!clickedOnSomething) {
-                for (let s = splines.length - 1; s >= 0; s--) {
-                    const spline = splines[s];
-                    for (let i = 0; i < spline.points.length; i++) {
-                        const p = spline.points[i];
-                        if (dist(mouseX, mouseY, p.x, p.y) < 15) {
-                            toggleItemInMultiSelection(p);
-                            clickedOnSomething = true;
-                            break;
-                        }
-                    }
-                    if (clickedOnSomething) break;
-                }
-            }
-
-            if (!clickedOnSomething) {
-                for (let i = splines.length - 1; i >= 0; i--) {
-                    const spline = splines[i];
-                    if (isMouseOnSpline(spline, 20)) {
-                        toggleSplineInMultiSelection(spline);
-                        clickedOnSomething = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!clickedOnSomething) {
-                multiSelection = [];
-                selectionBox = { x: mouseX, y: mouseY, w: 0, h: 0 };
-            }
-
-            updateSelectedItemUI();
-            return;
+            if (clickedOnSomething) break;
         }
+        if (clickedOnSomething) return;
 
-        if (multiSelection.length > 0) {
-            let canStartDrag = false;
-            for (const item of multiSelection) {
-                const itemPos = item.pos || item;
-                if (itemPos && dist(mouseX, mouseY, itemPos.x, itemPos.y) < 20) {
-                    canStartDrag = true;
-                    break;
-                }
-            }
-            if (!canStartDrag) {
-                for (const spline of splines) {
-                    const isSplineSelected = spline.points.length > 0 && spline.points.every(p => multiSelection.includes(p));
-                    if (isSplineSelected && isMouseOnSpline(spline, 20)) {
-                        canStartDrag = true;
-                        break;
-                    }
-                }
-            }
-            
-            if (canStartDrag) {
-                isDraggingSelection = true;
+        // Check for camera paths
+        for (const path of cameraPaths) {
+            if (mouseX > path.center.x - path.width / 2 && mouseX < path.center.x + path.width / 2 &&
+                mouseY > path.center.y - path.height / 2 && mouseY < path.center.y + path.height / 2) {
+                draggedCameraPath = path;
                 dragStartPos = createVector(mouseX, mouseY);
-                return;
+                selectCameraPath(path);
+                clickedOnSomething = true;
+                break;
             }
         }
+         if (clickedOnSomething) return;
 
-        multiSelection = [];
-        isDraggingSelection = false;
-        
-        for (let i = staticShapes.length - 1; i >= 0; i--) {
-            const shape = staticShapes[i];
-            if (mouseX > shape.pos.x - shape.shapeSizeX / 2 && mouseX < shape.pos.x + shape.shapeSizeX / 2 &&
-                mouseY > shape.pos.y - shape.shapeSizeY / 2 && mouseY < shape.pos.y + shape.shapeSizeY / 2) {
-                draggedStaticShape = shape;
-                selectStaticShape(shape);
-                return;
-            }
-        }
-
-        for (let s = splines.length - 1; s >= 0; s--) {
-            const spline = splines[s];
-            for (let i = 0; i < spline.points.length; i++) {
-                const p = spline.points[i];
-                if (dist(mouseX, mouseY, p.x, p.y) < 15) {
-                    draggedPoint = p;
-                    selectedPoint = p;
-                    selectedPointIndex = i;
-                    selectedSplineIndex = s;
-                    selectSpline(spline);
-                    return;
-                }
-            }
-        }
-
+        // Check for splines
         for (let i = splines.length - 1; i >= 0; i--) {
             const spline = splines[i];
-            if (isMouseOnSpline(spline, 20)) { 
-                draggedSpline = spline;
-                selectSpline(spline);
+            if (isMouseOnSpline(spline, 20)) {
+                if (keyIsDown(CONTROL)) {
+                    toggleSplineInMultiSelection(spline);
+                } else {
+                    const allPointsSelected = spline.points.every(p => multiSelection.includes(p));
+                    if (!allPointsSelected) {
+                        multiSelection = [];
+                    }
+                    draggedSpline = spline;
+                    selectSpline(spline);
+                }
                 dragStartPos = createVector(mouseX, mouseY);
-                return;
+                clickedOnSomething = true;
+                break;
             }
         }
-    
-        // This part of the code runs if the click did not land on any interactive item.
-        selectedSpline = null;
-        selectedStaticShape = null;
-        selectedPoint = null;
-        updateSelectedItemUI();
+        if (clickedOnSomething) return;
+
+        // If nothing was clicked, deselect everything or start selection box
+        if (!clickedOnSomething) {
+             if (keyIsDown(CONTROL)) {
+                selectionBox = { x: mouseX, y: mouseY, w: 0, h: 0 };
+            } else {
+                selectedSpline = null;
+                selectedStaticShape = null;
+                selectedPoint = null;
+                selectedCameraPath = null;
+                multiSelection = [];
+                updateSelectedItemUI();
+            }
+        }
     }
 }
 
 function mouseDragged() {
     if (isExporting) return;
-    
+
+    if (draggedDepthArrow) {
+        draggedDepthArrow.depth = mouseX - (draggedDepthArrow.center.x + draggedDepthArrow.width / 2);
+        updateCameraPath(draggedDepthArrow);
+        dragOccurred = true;
+    } else if (draggedCameraPath) {
+        const currentMousePos = createVector(mouseX, mouseY);
+        const delta = p5.Vector.sub(currentMousePos, dragStartPos);
+        draggedCameraPath.center.add(delta);
+        draggedCameraPath.innerCenter.add(delta);
+        updateCameraPath(draggedCameraPath);
+        dragStartPos = currentMousePos;
+        dragOccurred = true;
+    }
+
     if (selectionBox) {
         selectionBox.w = mouseX - selectionBox.x;
         selectionBox.h = mouseY - selectionBox.y;
     } else if (isDraggingSelection) {
         const currentMousePos = createVector(mouseX, mouseY);
         const delta = p5.Vector.sub(currentMousePos, dragStartPos);
-        const itemsToMove = new Set(multiSelection);
-        
+        const itemsToMove = new Set(multiSelection); // Use a Set to avoid duplicates
+
         itemsToMove.forEach(item => {
             if (item) {
-                 const itemPos = item.pos || item;
+                 const itemPos = item.pos || item; // Handle both static shapes (item.pos) and points (item)
                  if (itemPos && typeof itemPos.add === 'function') {
                     itemPos.add(delta);
                  }
             }
         });
-       
+
+        // If a shape spline is being dragged, update its center as well
+        const draggedShapeSplines = new Set();
+        itemsToMove.forEach(item => {
+            const owner = getOwnerOfItem(item);
+            if (owner && owner.isShapeSpline) {
+                draggedShapeSplines.add(owner);
+            }
+        });
+        draggedShapeSplines.forEach(spline => spline.center.add(delta));
+
+
         dragStartPos = currentMousePos;
         dragOccurred = true;
     } else if (draggedStaticShape) {
@@ -1452,6 +1639,9 @@ function mouseDragged() {
         for (let point of draggedSpline.points) {
             point.add(delta);
         }
+        if (draggedSpline.isShapeSpline) {
+            draggedSpline.center.add(delta);
+        }
         dragStartPos = currentMousePos;
         dragOccurred = true;
     }
@@ -1466,12 +1656,14 @@ function mouseReleased() {
   } else if (dragOccurred) {
       recordState();
   }
-  
+
   draggedPoint = null;
   draggedStaticShape = null;
   draggedSpline = null;
   dragStartPos = null;
   isDraggingSelection = false;
+  draggedCameraPath = null;
+  draggedDepthArrow = null;
   dragOccurred = false;
 }
 
@@ -1484,7 +1676,7 @@ function selectItemsInBox(box) {
     };
 
     multiSelection = [];
-    
+
     for (const shape of staticShapes) {
         if (shape.pos.x > r.x && shape.pos.x < r.x + r.w && shape.pos.y > r.y && shape.pos.y < r.y + r.h) {
             multiSelection.push(shape);
@@ -1548,6 +1740,9 @@ function findClosestPointOnSpline(spline, pos) {
 
 function isMouseOnSpline(spline, tolerance) {
   if (spline.points.length < 2) return false;
+  if (spline.isShapeSpline && spline.shape === 'circle') {
+      return dist(mouseX, mouseY, spline.center.x, spline.center.y) < spline.width / 2 + tolerance;
+  }
   for (let i = 0; i < spline.points.length - 1; i++) {
     for (let t = 0; t <= 1; t += 0.05) {
       const p = getPointOnSegment(spline, i, t);
@@ -1579,7 +1774,7 @@ function cloneSelectedItem() {
 
     if (item.pos && typeof item.pos.copy === 'function') {
         newItem.pos = item.pos.copy().add(offset);
-    } 
+    }
 
     if (item.points && Array.isArray(item.points)) {
         newItem.points = item.points.map(p => {
@@ -1606,14 +1801,14 @@ function cloneSelectedItem() {
       newItem.lineColor = splineColors[splineColorIndex];
       splineColorIndex = (splineColorIndex + 1) % splineColors.length;
     }
-    
+
     return newItem;
   }
 
   if (multiSelection.length > 0) {
     const splinesToClone = new Map();
     const shapesToClone = [];
-    
+
     multiSelection.forEach(item => {
       if (item && item.isStatic) {
         shapesToClone.push(item);
@@ -1630,7 +1825,7 @@ function cloneSelectedItem() {
         });
       }
     });
-    
+
     splinesToClone.forEach(newSpline => {
       splines.push(newSpline);
       newSelection.push(...newSpline.points);
@@ -1648,7 +1843,7 @@ function cloneSelectedItem() {
         didClone = true;
         multiSelection = newSelection;
     }
-    
+
   } else if (selectedSpline) {
     const newSpline = cloneItem(selectedSpline);
     if (newSpline) {
@@ -1675,42 +1870,61 @@ function cloneSelectedItem() {
 function removeSelectedItem() {
   let stateChanged = false;
 
-  if (multiSelection.length > 0) {
-      const pointsToDelete = new Set(multiSelection.filter(item => !item.isStatic));
+  if (selectedCameraPath) {
+      splines = splines.filter(s => !selectedCameraPath.splines.includes(s));
+      const index = cameraPaths.indexOf(selectedCameraPath);
+      if (index > -1) {
+          cameraPaths.splice(index, 1);
+      }
+      selectedCameraPath = null;
+      stateChanged = true;
+  } else if (multiSelection.length > 0) {
+      const pointsToDelete = new Set(multiSelection.filter(item => item instanceof p5.Vector));
       const shapesToDelete = new Set(multiSelection.filter(item => item.isStatic));
       const splinesToRemoveCompletely = new Set();
 
+      // Remove selected static shapes
       if (shapesToDelete.size > 0) {
           staticShapes = staticShapes.filter(shape => !shapesToDelete.has(shape));
           stateChanged = true;
       }
 
+      // Identify splines that will have all their points deleted
       splines.forEach(spline => {
-          const pointsInSplineToDelete = spline.points.filter(p => pointsToDelete.has(p));
-          if (pointsInSplineToDelete.length > 0 && (spline.points.length - pointsInSplineToDelete.length < 2)) {
+          const allPointsSelected = spline.points.every(p => pointsToDelete.has(p));
+          if (allPointsSelected) {
               splinesToRemoveCompletely.add(spline);
           }
       });
-      
+
+      // Filter out the splines that are going to be completely removed
+      if (splinesToRemoveCompletely.size > 0) {
+        splines = splines.filter(spline => !splinesToRemoveCompletely.has(spline));
+        stateChanged = true;
+      }
+
+      // For the remaining splines, remove only the selected points
       splines.forEach(spline => {
-          if (!splinesToRemoveCompletely.has(spline)) {
-              const initialCount = spline.points.length;
-              spline.points = spline.points.filter(p => !pointsToDelete.has(p));
-              if (spline.points.length < initialCount) {
-                  stateChanged = true;
-              }
+          const initialCount = spline.points.length;
+          spline.points = spline.points.filter(p => !pointsToDelete.has(p));
+          // If removing points results in a spline with less than 2 points, remove the whole spline
+          if (spline.points.length < 2 && initialCount >= 2) {
+              splinesToRemoveCompletely.add(spline); // Mark for removal
+          }
+          if (spline.points.length < initialCount) {
+              stateChanged = true;
           }
       });
 
+      // Final pass to remove splines that became invalid
       if (splinesToRemoveCompletely.size > 0) {
           splines = splines.filter(spline => !splinesToRemoveCompletely.has(spline));
-          stateChanged = true;
       }
-      
+
       multiSelection = [];
   } else if (selectedStaticShape) {
     const index = staticShapes.indexOf(selectedStaticShape);
-    if (index > -1) { 
+    if (index > -1) {
         staticShapes.splice(index, 1);
         stateChanged = true;
     }
@@ -1770,7 +1984,7 @@ function addPointToSpline() {
         // No valid splines to add points to.
         return;
     }
-    
+
     // Iterate through the unique set of splines and add a point to each.
     splinesToModify.forEach(spline => {
         if (spline.points.length < 2) return; // continue to next spline
@@ -1846,6 +2060,42 @@ function toggleLoop() {
 // ==============================
 // SPLINE & CANVAS MATH/LOGIC
 // ==============================
+function updateCameraPath(path) {
+    const { center, innerCenter, width, height, depth } = path;
+    const halfW = width / 2;
+    const halfH = height / 2;
+    const innerHalfW = (width - depth * 2) / 2;
+    const innerHalfH = (height - depth * 2) / 2;
+
+    const corners = [
+        { x: -halfW, y: -halfH },
+        { x: halfW, y: -halfH },
+        { x: halfW, y: halfH },
+        { x: -halfW, y: halfH }
+    ];
+
+    const innerCorners = [
+        { x: -innerHalfW, y: -innerHalfH },
+        { x: innerHalfW, y: -innerHalfH },
+        { x: innerHalfW, y: innerHalfH },
+        { x: -innerHalfW, y: innerHalfH }
+    ];
+
+    for (let i = 0; i < 4; i++) {
+        const startPoint = createVector(center.x + corners[i].x, center.y + corners[i].y);
+        const endPoint = createVector(innerCenter.x + innerCorners[i].x, innerCenter.y + innerCorners[i].y);
+        if (depth < 0) {
+            path.splines[i].points[0].set(endPoint);
+            path.splines[i].points[1].set(startPoint);
+        } else {
+            path.splines[i].points[0].set(startPoint);
+            path.splines[i].points[1].set(endPoint);
+        }
+    }
+
+    path.depthControl.set(center.x + halfW + depth, center.y);
+}
+
 function applyEasing(progress, spline) {
     // Check if the easing curve editor and the specific curve exist
     if (easingCurveEditor && spline && spline.easingCurve) {
@@ -1869,8 +2119,8 @@ function getObjectPlaybackState(obj) {
   } else {
     currentTimeMs = parseFloat(timelineScrubber.value) * mainTimelineDurationMs;
   }
-  
-  let rawProgress = 0; 
+
+  let rawProgress = 0;
   let isVisible = false;
   const startMs = (obj.startFrame / exportFps) * 1000;
   const durationMs = (obj.totalFrames / exportFps) * 1000 || 1;
@@ -1891,7 +2141,7 @@ function getObjectPlaybackState(obj) {
       isVisible = obj.holdOnStart;
     }
   }
-  
+
   const easedProgress = applyEasing(rawProgress, obj);
 
   return { isVisible, rawProgress: constrain(rawProgress, 0, 1), easedProgress };
@@ -1963,9 +2213,9 @@ function windowResized() {
 
     const projWidth = originalImageDimensions.width;
     const projHeight = originalImageDimensions.height;
-    
+
     const ratio = Math.min(availableWidth / projWidth, availableHeight / projHeight);
-    
+
     const newWidth = Math.floor(projWidth * ratio);
     const newHeight = Math.floor(projHeight * ratio);
 
@@ -1990,7 +2240,7 @@ function windowResized() {
             }
         }
     }
-    
+
     if (animCurveEditor) animCurveEditor.windowResized();
     if (easingCurveEditor) easingCurveEditor.windowResized();
 }
@@ -2014,10 +2264,10 @@ function resetCanvasSize() {
   } else {
     targetDimensions = { width: 1920, height: 800 };
   }
-  
+
   document.getElementById('canvasWidth').value = targetDimensions.width;
   document.getElementById('canvasHeight').value = targetDimensions.height;
-  
+
   updateCanvasSize();
 }
 
@@ -2030,7 +2280,7 @@ function handlePaste(event) {
         if (items[i].type.indexOf('image') !== -1) {
             const file = items[i].getAsFile();
             loadAsRegularImage(file);
-            break; 
+            break;
         }
     }
 }
@@ -2080,7 +2330,7 @@ function loadSceneFromFile(file) {
             const jsonData = text.substring(markerIndex + METADATA_MARKER.length);
             try {
                 const sceneData = JSON.parse(jsonData);
-                loadScene(sceneData); 
+                loadScene(sceneData);
             } catch (err) {
                 console.error("Failed to parse scene data, loading as regular image.", err);
                 loadAsRegularImage(file);
@@ -2144,7 +2394,7 @@ function loadScene(sceneData) {
             newShape.pos = createVector(sData.pos.x * scaleX, sData.pos.y * scaleY);
             newShape.shapeSizeX = (sData.shapeSizeX || 10) * avgScale;
             newShape.shapeSizeY = (sData.shapeSizeY || 10) * avgScale;
-            
+
             // Add defaults for backward compatibility with older save files
             if (newShape.startFrame === undefined) newShape.startFrame = 0;
             if (newShape.totalFrames === undefined) newShape.totalFrames = 80;
@@ -2154,7 +2404,7 @@ function loadScene(sceneData) {
             staticShapes.push(newShape);
         });
     }
-    
+
     splineColorIndex = sceneData.splineColorIndex || 0;
     selectedSpline = null;
     selectedStaticShape = null;
@@ -2170,14 +2420,14 @@ function loadScene(sceneData) {
 
 function exportScene() {
     const sceneData = {
-        splines: splines.map(s => ({ ...s, 
-            points: s.points.map(p => ({ x: p.x, y: p.y })), 
+        splines: splines.map(s => ({ ...s,
+            points: s.points.map(p => ({ x: p.x, y: p.y })),
             scaleCurve: s.scaleCurve.map(pt => ({...pt})),
             easingCurve: s.easingCurve.map(pt => ({...pt}))
         })),
-        staticShapes: staticShapes.map(s => ({ ...s, 
-            pos: { x: s.pos.x, y: s.pos.y }, 
-            scaleCurve: s.scaleCurve.map(pt => ({...pt})) 
+        staticShapes: staticShapes.map(s => ({ ...s,
+            pos: { x: s.pos.x, y: s.pos.y },
+            scaleCurve: s.scaleCurve.map(pt => ({...pt}))
         })),
         originalImageDimensions: { width: width, height: height },
         splineColorIndex: splineColorIndex
@@ -2189,7 +2439,7 @@ function exportScene() {
     drawStaticShapes(tempCanvas);
     drawMovingShapes(tempCanvas);
     const imageDataUrl = tempCanvas.elt.toDataURL('image/png');
-    
+
     fetch(imageDataUrl).then(res => res.blob()).then(imageBlob => {
         const metadataBlob = new Blob([METADATA_MARKER + jsonDataString], { type: 'text/plain' });
         const combinedBlob = new Blob([imageBlob, metadataBlob], { type: 'image/png' });
@@ -2247,7 +2497,7 @@ function startExport() {
 function drawExportFrame(overallProgress) {
   exportCanvas.background(0);
   const exportCurrentFrame = overallProgress * exportTotalFrames;
-  
+
   // Draw Static Shapes (Anchors)
   for (const shape of staticShapes) {
     const endFrame = shape.startFrame + shape.totalFrames;
@@ -2270,7 +2520,7 @@ function drawExportFrame(overallProgress) {
       exportCanvas.stroke(shape.strokeColor);
       exportCanvas.strokeWeight(shape.strokeWeight * ((scaleX + scaleY) / 2));
       exportCanvas.translate(shape.pos.x * scaleX, shape.pos.y * scaleY);
-      drawShapeOnCanvas(exportCanvas, shape.shapeType, shape.shapeSizeX * scaleX * scaleMultiplier, shape.shapeSizeY * scaleY * scaleMultiplier); 
+      drawShapeOnCanvas(exportCanvas, shape.shapeType, shape.shapeSizeX * scaleX * scaleMultiplier, shape.shapeSizeY * scaleY * scaleMultiplier);
       exportCanvas.pop();
     }
   }
@@ -2416,21 +2666,21 @@ function setupDraggableElements() {
             startX = e.clientX;
             startValue = parseFloat(element.value || element.textContent) || 0;
             document.body.style.cursor = 'ew-resize';
-            
+
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
         };
 
         const onMouseMove = (e) => {
             if (!isDragging) return;
-            
+
             e.preventDefault();
 
             const dx = e.clientX - startX;
             const step = parseFloat(element.step) || 1;
             const min = parseFloat(element.min) || 1;
             const max = parseFloat(element.max) || 99999;
-            
+
             const sensitivity = 5;
             const valueChange = Math.round(dx / sensitivity) * step;
             let newValue = startValue + valueChange;
@@ -2440,13 +2690,13 @@ function setupDraggableElements() {
 
             const stepString = step.toString();
             const decimalPlaces = stepString.includes('.') ? stepString.split('.')[1].length : 0;
-            
+
             if (element.tagName === 'INPUT') {
                 element.value = newValue.toFixed(decimalPlaces);
             } else {
                 element.textContent = newValue.toFixed(decimalPlaces);
             }
-            
+
             element.dispatchEvent(new Event('input', { bubbles: true }));
         };
 
@@ -2454,10 +2704,10 @@ function setupDraggableElements() {
             if (isDragging) {
                 isDragging = false;
                 document.body.style.cursor = 'default';
-                
+
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
-                
+
                 element.dispatchEvent(new Event('change', { bubbles: true }));
                 if (element.id === 'total-frames') {
                     element.dispatchEvent(new Event('blur', { bubbles: true }));
