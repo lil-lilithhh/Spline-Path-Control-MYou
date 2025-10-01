@@ -420,12 +420,12 @@ body.dark-mode #null1:hover {
 
 
 /* --- Destructive / Danger Buttons --- */
-#clearAll, #deleteSpline, #removePoint, #resetCurveBtn, #resetEasingCurveBtn {
+#clearAll, #deleteItem, #removePoint, #resetCurveBtn, #resetEasingCurveBtn {
   background-color: var(--accent-danger);
   color: #643807;
   border-color: transparent;
 }
-#clearAll:hover, #deleteSpline:hover, #removePoint:hover, #resetCurveBtn:hover, #resetEasingCurveBtn:hover {
+#clearAll:hover, #deleteItem:hover, #removePoint:hover, #resetCurveBtn:hover, #resetEasingCurveBtn:hover {
   background-color: var(--accent-danger);
   color: #643807;
   border-color: var(--accent-danger);
@@ -458,12 +458,12 @@ body.dark-mode #null1:hover {
   box-shadow: 0 0 15px 1px var(--glow-neutral);
 }
 
-#deleteSpline {
+#deleteItem {
   position: relative;
   --clear-all-margin: 2rem;
   margin-left: var(--clear-all-margin);
 }
-#deleteSpline::before {
+#deleteItem::before {
   content: '';
   position: absolute;
   left: calc((var(--clear-all-margin) + 0.75rem) / -2);
@@ -816,24 +816,6 @@ body.dark-mode .collapsible-header:hover { background-color: var(--bg-surface); 
   border-radius: 24px; /* Rounded corners */
 }
 
-.deletepoint-button {
-  background-image: url('icons/remove_anchor.svg');
-  background-size: 28px 28px; /* Adjust size */
-  background-repeat: no-repeat;
-  background-position: center; /* Position the icon */
-}
-
-.deletepoint-button {
-  display: flex;
-  align-items: center; /* Center the icon and text vertically */
-  padding: 24px 24px; /* Add padding */
-  border: none; /* Remove default border */
-  background-color: #007bff; /* Button background color */
-  color: white; /* Text color */
-  cursor: pointer; /* Pointer cursor on hover */
-  border-radius: 24px; /* Rounded corners */
-}
-
 .undo-btn {
   background-image: url('icons/undo.svg');
   background-size: 28px 28px; /* Adjust size */
@@ -946,6 +928,11 @@ body.dark-mode .collapsible-header:hover { background-color: var(--bg-surface); 
 
 .control-group label[for="selectedLoop"] { min-width: initial; flex-grow: 1; }
 .control-group label[for="selectedHoldOnStart"] { min-width: initial; flex-grow: 1; }
+.control-group label[for="selectedScaleWithFPS"] { min-width: initial; flex-grow: 1; }
+.control-group label[for="anchorLoop"] { min-width: initial; flex-grow: 1; }
+.control-group label[for="anchorHoldOnStart"] { min-width: initial; flex-grow: 1; }
+.control-group label[for="anchorHideOnComplete"] { min-width: initial; flex-grow: 1; }
+.control-group label[for="anchorScaleWithFPS"] { min-width: initial; flex-grow: 1; }
 
 #playPauseBtn {
     background-color: var(--accent-green);
@@ -987,6 +974,70 @@ body.dark-mode .collapsible-header:hover { background-color: var(--bg-surface); 
     background-color: var(--accent-danger-hover);
 }
 
+#addShapeSpline {
+    background-color: var(--accent-green);
+    color: #fff;
+    background-image: url('icons/add_shapes.svg');
+    background-size: 28px 28px;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 24px; /* Make it square */
+    border-radius: 50%; /* Make it circular */
+}
+
+#addShapeSpline:hover {
+    background-color: var(--accent-green);
+    box-shadow: 0 0 15px 1px var(--glow-primary);
+}
+
+#addShapeSpline {
+  position: relative;
+  --clear-all-margin: 2rem;
+  margin-left: var(--clear-all-margin);
+}
+
+#addShapeSpline::before {
+  content: '';
+  position: absolute;
+  left: calc((var(--clear-all-margin) + 0.75rem) / -2);
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
+  background-color: var(--border-color);
+}
+
+#addCameraPath {
+    background-color: var(--accent-green);
+    color: #fff;
+    background-image: url('icons/add_camera.svg');
+    background-size: 28px 28px;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 24px; /* Make it square */
+    border-radius: 50%; /* Make it circular */
+}
+
+#addCameraPath:hover {
+    background-color: var(--accent-green);
+    box-shadow: 0 0 15px 1px var(--glow-primary);
+}
+
+#animateCameraPath {
+    background-color: var(--accent-green);
+    color: #fff;
+    background-image: url('icons/link_camera.svg');
+    background-size: 28px 28px;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 24px; /* Make it square */
+    border-radius: 50%; /* Make it circular */
+}
+
+#animateCameraPath:hover {
+    background-color: var(--accent-green);
+    box-shadow: 0 0 15px 1px var(--glow-primary);
+}
+
 /* Custom styles for the blend slider */
 #blendSlider::-webkit-slider-runnable-track {
   background: #fab981;
@@ -1006,4 +1057,47 @@ body.dark-mode .collapsible-header:hover { background-color: var(--bg-surface); 
     font-size: 10px;
     color: var(--text-secondary);
     margin-right: 10px;
+}
+
+.popover-container {
+    position: relative;
+    display: inline-block;
+}
+
+.popover-content {
+    display: none;
+    position: absolute;
+    bottom: 100%; /* Position above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #f9f9f9;
+    min-width: 100px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 4px;
+    padding: 5px 0;
+}
+
+.popover-content a {
+    color: black;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.popover-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.dark-mode .popover-content {
+    background-color: #343a40;
+}
+
+.dark-mode .popover-content a {
+    color: #f8f9fa;
+}
+
+.dark-mode .popover-content a:hover {
+    background-color: #495057;
 }
