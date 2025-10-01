@@ -1,6 +1,7 @@
 # Spline Path Control Material You v2.9
 
-<img width="1852" height="994" alt="user-interface-skateboard" src="https://github.com/user-attachments/assets/a5feec81-c61e-461a-aa4c-57199eef187d" />
+<img width="1843" height="986" alt="myou" src="https://github.com/user-attachments/assets/4679f901-c9f8-40ee-ba3f-ed70d1efe4ee" />
+
 
 ## Overview
 
@@ -8,7 +9,7 @@ Spline Path Control MYou is a simple tool inspired by Material You. It's designe
 
 ### Update v2.9:
 * Added a new Camera button. Pressing this button will spawn a Camera object, which comes with a new widget that minipulates the "zoom" level of the camera.
-* Added a new Link Camera button. With this button, you can link the position of the camera's focal point to an anchor, letting you have the ability to dynamically adjust the position of the camera's focal point.
+* Added a new Link Camera button. With this button, you can link the position of the camera's focal point to an anchor, letting you have the ability to dynamically adjust the position of the camera's focal point. Left click an anchor, then ctrl+left click a camera and press the Link button to link the camera to the anchor.
 * Added a new Shapes button. Create either a circle or rectangle shaped spline. Makes creating certain actions a breeze.
 * Unified the ability to delete splines, anchors, cameras, and points into one button.
 * Updated some icons.
