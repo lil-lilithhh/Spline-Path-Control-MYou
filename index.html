@@ -30,13 +30,17 @@
                   <label for="selectedTension">Tension:</label>
                   <input type="number" id="selectedTension" min="0" max="1" step="0.1" value="0" title="Change the curviness of the spline's path.">
                 </div>
+                <div class="control-group">
+                    <label for="shapeSize">Size:</label>
+                    <input type="number" id="shapeSize" min="1" max="1000" step="1" value="100">
+                </div>
                 <div class="control-group checkbox-group">
                     <label for="selectedLoop">Loop</label>
                     <input type="checkbox" id="selectedLoop" title="Loop the spline/anchor til infinity. Decreasing or increasing the start or end frame changes how fast each loop is."> 
                 </div>
                 <div class="control-group checkbox-group">
                     <label for="selectedHoldOnStart">Hold Start Frame</label>
-                    <input type="checkbox" id="selectedHoldOnStart" title="Hold the spline/anchor's starting position until the frame counter reaches the start frame ."> 
+                    <input type="checkbox" id="selectedHoldOnStart" title="Hold the spline/anchor's starting position until the frame counter reaches the start frame."> 
                 </div>
                 <div class="control-group checkbox-group">
                     <label for="selectedHideOnComplete">Hide When Done</label>
@@ -49,7 +53,7 @@
                 <div class="section-divider">Path Easing</div>
                 <div id="easing-curve-editor-container" class="curve-editor-container"></div>
                 <div class="control-group">
-                    <label for="selectedEasingTension">Easing Tension</label>
+                    <label for="selectedEasingTension">Easing Tension:</label>
                     <input type="number" id="selectedEasingTension" class="control-input" value="0" step="0.1" min="0" max="1" title="Controls the curvature of the path easing.">
                 </div>
                 <div class="control-group">
@@ -121,7 +125,7 @@
                 <div class="section-divider">Scale Over Time</div>
                 <div id="curve-editor-container" class="curve-editor-container"></div>
                 <div class="control-group">
-                    <label for="anchorScaleTension">Scale Tension</label>
+                    <label for="anchorScaleTension">Scale Tension:</label>
                     <input type="number" id="anchorScaleTension" class="control-input" value="0" step="0.1" min="0" max="1" title="Controls the curvature of the scale animation.">
                 </div>
                 <div class="control-group">
@@ -200,11 +204,19 @@
         <button id="loopBtn" title="Loop the playback"></button>
         <div class="spacer"></div>
          <button id="newSpline" type="button" class="spline-button" title="Add a spline to the canvas"></button>
-        <button id="addPoint" type="button" class="addpoint-button" title="Add point to selected spline"></button></button>
-        <button id="addShape" type="button" class="addanchor-button" title="Add an anchor to the canvas"></button></button></button>
+         <button id="addPoint" type="button" class="addpoint-button" title="Add point to selected spline"></button></button>
+         <button id="addShape" type="button" class="addanchor-button" title="Add an anchor to the canvas"></button></button></button>
+         <div class="popover-container">
+            <button id="addShapeSpline" type="button" class="spline-button" title="Add a shape spline to the canvas"></button>
+            <div id="shape-spline-popover" class="popover-content">
+                <a href="#" id="addCircleSpline">Circle</a>
+                <a href="#" id="addRectangleSpline">Rectangle</a>
+            </div>
+        </div>
+         <button id="addCameraPath" type="button" class="spline-button" title="Add a camera to the canvas"></button>
+         <button id="animateCameraPath" type="button" class="spline-button" title="Link a camera's focal point to an anchor"></button>
         <button id="cloneItem" type="button" class="clone-button" title="Clone the selected spline/anchor"></button>
-        <button id="deleteSpline" type="button" class="deletespline-button" title="Delete the selected spline"></button>
-        <button id="removePoint" type="button" class="deletepoint-button" title="Delete the selected anchor/point"></button></button>
+        <button id="deleteItem" type="button" class="deletespline-button" title="Delete a selected item"></button>
         <button id="undoBtn" type="button" class="undo-btn" title="Undo the last action"></button></button>
         <button id="redoBtn" type="button" class="redo-btn" title="Redo the last action"></button></button>
         <button id="clearAll" title="Clear all anchors and splines">Clear All</button>
