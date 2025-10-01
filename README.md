@@ -5,7 +5,7 @@
 
 ## Overview
 
-Spline Path Control MYou is a simple tool inspired by Material You. It's designed to make it easy to create motion paths, which allows you to create and animate shapes that follow splines, and then export the result as a `.webm` video file. Input the motion paths into VACE to control the motion of anything (camera movement, objects, humans etc) all without extra prompting.
+Spline Path Control MYou is a simple tool inspired by Material You. It's designed to make it easy to create motion paths, which allows you to create and animate shapes that follow splines, and then export the result as a `.webm` video file. Input the motion paths into Wan VACE to control the motion of anything (camera movement, objects, humans etc) all without extra prompting.
 
 ### Update v2.9:
 * Added a new Camera button. Pressing this button will spawn a Camera object, which comes with a new widget that minipulates the "zoom" level of the camera.
@@ -48,6 +48,7 @@ Added the following:
 
 ## Features
 
+* **Beautiful Design:** A gorgeous user interface designed for humans; because Gen AI has been lacking in this department.
 * **Multi-Spline Editing:** Create multiple, independent spline paths
 * **Intuitive Controls:** Quickly edit splines and points
 * **Playback scrubber:** Scrub through playback via the timeline and go frame-by-frame with the arrow keys
