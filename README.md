@@ -10,7 +10,7 @@ Spline Path Control Material You is a simple tool inspired by Material You. It's
 Input the output driving video into Wan VACE to control the motion of anything (camera movement, objects, humans etc) all without extra prompting.
 
 ### Update v2.9:
-* Added a new Camera button. Pressing this button will spawn a Camera object, which comes with a new widget that minipulates the "zoom" level of the camera.
+* Added a new Camera button. Pressing this button will spawn a Camera object, which comes with a new widget that manipulates the "zoom" level of the camera.
 * Added a new Link Camera button. With this button, you can link the position of the camera's focal point to an anchor, letting you have the ability to dynamically adjust the position of the camera's focal point. Left click an anchor, then ctrl+left click a camera and press the Link button to link the camera to the anchor.
 * Added a new Shapes button. Create either a circle or rectangle shaped spline. Makes creating certain actions a breeze.
 * Unified the ability to delete splines, anchors, cameras, and points into one button.
